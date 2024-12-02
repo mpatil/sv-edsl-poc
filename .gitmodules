@@ -1,0 +1,9 @@
+[submodule "bnfc"]
+	path = bnfc
+	url = https://github.com/mpatil/bnfc.git
+[submodule "sv-lex"]
+	path = sv-lex
+	url = https://github.com/mpatil/sv-lex
+[submodule "sv-yacc"]
+	path = sv-yacc
+	url = https://github.com/mpatil/sv-yacc

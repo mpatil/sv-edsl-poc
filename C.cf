@@ -1,0 +1,182 @@
+entrypoints Program;
+rules Program ::= [Stmt_Item];
+separator Stmt_Item "";
+
+-- Stmts
+
+VarDeclStmt.     Stmt_Item  ::= "var" Ident ";";
+VarAssDeclStmt.  Stmt_Item  ::= "var" Var_Assignment ";";
+AssignmentStmt.  Stmt_Item  ::= Var_Assignment ";";
+ConditionalStmt. Stmt_Item ::=  Conditional_Stmt;
+IncDecOpStmt.    Stmt_Item ::=  Ident Inc_Or_Dec_Operator ";";
+LoopStmt.        Stmt_Item ::=  Loop_Stmt;
+JumpStmt.        Stmt_Item ::=  Jump_Stmt ";";
+BlockStmt.       Stmt_Item ::=  "{" [Stmt_Item] "}";
+BuiltInStmt.     Stmt_Item ::=  Builtin_Task ";";
+ProcDefStmt.     Stmt_Item ::=  Proc_Definition;
+FuncDefStmt.     Stmt_Item ::=  Func_Definition;
+ProcCallStmt.    Stmt_Item ::=  FuncOrProcCall ";" ;
+
+separator Expr ",";
+
+Assignment. Var_Assignment ::= Ident Range_Expr_Opt "=" Expr;
+
+Break.         Jump_Stmt ::= "break";
+Continue.      Jump_Stmt ::= "continue" ;
+Return.        Jump_Stmt ::= "return" Expr_Opt ;
+
+-- Function or Proc Call
+
+Call. FuncOrProcCall ::= Ident "(" [Expr] ")";
+
+-- Built In
+
+Print.         Builtin_Task ::= "print" "(" [Print_Arg] ")";
+RegWr.         Builtin_Task ::= "regwr" "(" Bar "," Expr  "," Expr ")";
+Wait.          Builtin_Task ::= "wait" "(" Expr ")";
+Fatal.         Builtin_Task ::= "fatal" "(" Expr ")";
+
+RegRd.         Builtin_Fn ::= "regrd" "(" Bar "," Expr  ")";
+WaitInterrupt. Builtin_Fn ::= "intr_wait" "(" "(" [Expr] ")" "," Expr ")";
+Ceil.          Builtin_Fn ::= "ceil" "(" Expr ")";
+Floor.         Builtin_Fn ::= "floor" "(" Expr ")";
+Log2.          Builtin_Fn ::= "log2" "(" Expr ")";
+Sys.           Builtin_Fn ::= "sys" "(" String_Literal ")";
+IsDefd.        Builtin_Fn ::= "defined" "(" Ident ")";
+
+Bar_. Bar ::= Expr;
+
+PrExpr.   Print_Arg ::= Expr;
+PrString. Print_Arg ::= String_Literal;
+PrHex.    Print_Arg ::= "hex" "(" Expr ")";
+PrBin.    Print_Arg ::= "bin" "(" Expr ")";
+separator nonempty Print_Arg ",";
+
+-- Definition
+
+ProcDef. Proc_Definition ::= "procedure" Definition;
+
+FuncDef. Func_Definition ::= "function" Definition;
+
+Defn. Definition ::= Ident "("  [Formal_Arg] ")" Stmt_Item;
+
+Formal. Formal_Arg ::= Ident;
+separator Formal_Arg ",";
+
+-- Conditional statements
+
+ElsIf. Else_If ::= "elsif" "(" Expr ")" Stmt_Item;
+separator Else_If "";
+
+ElseIsEmpty. Else_Opt ::= ;
+ElseIsElse.  Else_Opt ::= "else" Stmt_Item;
+
+If. Conditional_Stmt ::= "if" "(" Expr ")" Stmt_Item [Else_If] Else_Opt ;
+
+-- Looping statements
+
+While. Loop_Stmt  ::= "while" "(" Expr ")" Stmt_Item;
+For.   Loop_Stmt  ::= "for" "(" For_Init_Opt ";" Expr_Opt ";" For_Step_Opt ")" Stmt_Item;
+
+ForInitIsEmpty.   For_Init_Opt ::= ;
+ForInitIsInit.    For_Init_Opt ::= Var_Assignment;
+ForInitIsVarInit. For_Init_Opt ::= "var" Var_Assignment;
+
+ExprIsEmpty. Expr_Opt ::= ;
+ExprIsExpr.  Expr_Opt ::= Expr;
+
+ForStepIsEmpty.      For_Step_Opt ::= ;
+ForStepIsAssignment. For_Step_Opt ::= Var_Assignment;
+ForStepIsIncOrDec.   For_Step_Opt ::= Ident Inc_Or_Dec_Operator;
+
+-- Expressions
+
+_. Op ::= Op1;
+_. Op ::= Op2;
+_. Op ::= Op3;
+_. Op ::= Op4;
+_. Op ::= Op5;
+_. Op ::= Op6;
+_. Op ::= Op7;
+
+Pow.  Op7  ::=  "**";
+Mul.  Op6  ::=  "*" ;
+Div.  Op6  ::=  "/" ;
+Mod.  Op6  ::=  "%" ;
+Add.  Op5  ::=  "+" ;
+Sub.  Op5  ::=  "-" ;
+LAnd. Op4  ::=  "&" ;
+Xor.  Op4  ::=  "^" ;
+LOr.  Op4  ::=  "|" ;
+Rsh.  Op3  ::=  ">>";
+Lsh.  Op3  ::=  "<<";
+Lt.   Op2  ::=  "<" ;
+Leq.  Op2  ::=  "<=";
+Gt.   Op2  ::=  ">" ;
+Geq.  Op2  ::=  ">=";
+Eq.   Op2  ::=  "==";
+Neq.  Op2  ::=  "!=";
+And.  Op1  ::=  "&&";
+Or.   Op1  ::=  "||";
+
+ExprPrim.     Expr9 ::= Primary;
+ExprUnary.    Expr8 ::= Unary_Operator Expr9 ;
+ExprBltin.    Expr8 ::= Builtin_Fn;
+ExprFuncCall. Expr8 ::= FuncOrProcCall ;
+op.           Expr7 ::= Expr8  Op7   Expr7;
+op.           Expr6 ::= Expr6  Op6   Expr7;
+op.           Expr5 ::= Expr5  Op5   Expr6;
+op.           Expr4 ::= Expr4  Op4   Expr5;
+op.           Expr3 ::= Expr3  Op3   Expr4;
+op.           Expr2 ::= Expr3  Op2   Expr3;
+op.           Expr1 ::= Expr1  Op1   Expr2;
+ExprTernary.  Expr  ::= Expr "?" Expr1 ":" Expr1;
+
+internal EOp. Expr ::= Expr9 Op Expr9;
+define op e1 o e2 = EOp e1 o e2;
+
+coercions Expr 9;
+
+PrimIdent.  Primary ::= Ident Range_Expr_Opt;
+PrimNumber. Primary ::= Number ;
+
+RangeExprIsEmpty.  Range_Expr_Opt ::= ;
+RangeExprIsRange.  Range_Expr_Opt ::= "[" Range_Expr "]";
+RangeExprBit.      Range_Expr ::= Expr;
+RangeExprRange.    Range_Expr ::= Expr ":" Expr;
+
+-- Operators
+UnaryPlus.  Unary_Operator ::= "+";
+UnaryMinus. Unary_Operator ::= "-";
+UnaryNot.   Unary_Operator ::= "!" ;
+UnaryComp.  Unary_Operator ::= "~" ;
+
+Incr. Inc_Or_Dec_Operator ::= "++";
+Decr. Inc_Or_Dec_Operator ::= "--";
+
+-- Numbers
+token Decimal_Number  (digit (digit)*);
+
+token Real_Number  (digit (digit)*) '.' (digit (digit )*);
+
+token BinaryNumber  ('0' ["bB"])(["01"] (["01_"])*);
+token HexNumber  ('0' ["xX"])(["0123456789abcdefABCDEF"] (["0123456789abcdefAABCDEF_"])*);
+
+Decimal. Number ::= Decimal_Number;
+Binary. Number ::= BinaryNumber;
+Hex. Number ::= HexNumber;
+Real. Number ::= Real_Number;
+
+-- Strings
+
+token AnyChars '"' (char - ["\r\n\t\""])* '"' ;
+
+StringLit. String_Literal ::= AnyChars;
+
+-- Comments
+
+comment "//";
+comment "/*" "*/";
+
+forever. Loop_Stmt ::= "forever" Stmt_Item;
+define forever s = For ForInitIsEmpty ExprIsEmpty ForStepIsEmpty s;
