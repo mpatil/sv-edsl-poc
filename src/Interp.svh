@@ -4,7 +4,267 @@
 `define INTERP_HEADER
 `include "Absyn.svh"
 
+typedef enum {VAR, UNDEF, PROC, FUNC, CMD} Type_;
+typedef longint unsigned ulongint;
+typedef int unsigned uint;
+
 class Interp implements Visitor;
+  typedef enum {PLUS, MINUS, NOT, COMP} UnaryOp;
+  typedef enum {POW, MUL, DIV, MOD, ADD, SUB, LAND, XOR, LOR, RSH, LSH, LT, LEQ, GT, GEQ, EQ, NEQ, AND, OR} BinaryOp;
+  typedef enum {GLOBAL, CURRENT, ALL} Scope;
+
+  int in_loop = 0;
+  int in_call = 0;
+
+  Type_ defn_type = PROC;
+  Type_ call_type = PROC;
+
+  int break_jump = 0;
+  int continue_jump = 0;
+  int return_jump = 0;
+  int exit_fatal = 0;
+
+  int var_install = 0;
+
+  int scope = -1;
+
+  const int top_scope = 0;
+
+  UnaryOp unary_op = PLUS;
+  BinaryOp binary_op = ADD;
+
+  string prstr;
+
+  typedef class NumVal;
+  typedef class StrVal;
+  typedef class ProcDefn;
+
+  class SymVal;
+    static function SymVal create(string type_);
+      SymVal p;
+      if (type_ == "num") begin $write("getting NumVal\n"); p = NumVal::new(); end
+      else if (type_ == "str") p = StrVal::new();
+      else if (type_ == "proc") p = ProcDefn::new();
+      return p;
+    endfunction
+
+    virtual function string get_type ();
+      return "undef";
+    endfunction
+
+    virtual function string do_print (string prefix = "", string prefix_ = "");
+      return {prefix_, prefix, prefix_, "bad"};
+    endfunction
+  endclass
+
+  class Symbol;
+      string name = "";
+      Type_ type_ = UNDEF;       /* VAR, UNDEF, PROC, FUNC */
+      SymVal u = null;
+
+    function string do_print (string prefix = "", string prefix_ = "");
+        if (u)
+          return {prefix_, prefix, prefix_, " name: ", u.do_print(name)};
+        else
+          return {prefix_, prefix, prefix_, " name: ", name};
+    endfunction
+  endclass
+
+  class NumVal extends SymVal;
+    real val = 0; /* if number */
+
+    function string get_type();
+        return "num";
+    endfunction
+
+    function string do_print (string prefix = "", string prefix_ = "");
+        return {prefix_, prefix, prefix_, " numval: ", $sformatf("%f", val), "\n"};
+    endfunction
+  endclass
+
+  class StrVal extends SymVal;
+    string val = ""; /* if string */
+
+    function string get_type ();
+        return "str";
+    endfunction
+
+    function string do_print (string prefix = "", string prefix_ = "");
+        return {prefix_, prefix, prefix_, " string val ", val, "\n"};
+    endfunction
+  endclass
+
+  class ProcDefn extends SymVal;
+    Stmt_Item code; /* if proc */
+    string formals[$];
+
+    function string get_type ();
+        return "proc";
+    endfunction
+
+    function string do_print (string prefix = "", string prefix_ = "");
+      return {prefix_, prefix, prefix_, " function ", "\n"};
+    endfunction
+  endclass
+
+  typedef struct {
+    real ival = 0.0;
+    string sval = "";
+    Symbol sym = null;
+  } Datum;
+
+  class Env;
+      Datum stack_[$];     /* the stack */
+      Symbol symlist[$];   /* symbol table: linked list */
+
+    function string do_symlist_print (string prefix = "", string prefix_ = "");
+      string str =  {prefix_, prefix, prefix_, "symbol table:\n"};
+
+      for (int i = 0; i < symlist.size(); i++) begin
+          str = {str, symlist[i].do_print()};
+      end
+      return str;
+    endfunction
+  endclass
+
+  Env envlist[$];
+
+  task push(Datum d);
+`ifdef DEBUG
+    string dbg_str = "";
+
+    $write("push: scope: %0d, stack size: %0d ::  ", scope, envlist[scope].stack_.size());
+
+    if(d.sym) begin
+      $write(" sym");
+      dbg_str = d.sym.do_print();
+    end else begin
+      if (d.sval.len())
+        dbg_str = d.sval;
+      else
+        dbg_str = $sformatf("%s", d.ival);
+    end
+
+    $write("%s\n", dbg_str);
+`endif
+    envlist[scope].stack_.push_back(d);
+  endtask
+
+
+  function Datum pop();
+    Datum d;
+
+    string dbg_str = "";
+
+    if (envlist[scope].stack_.size())
+      d = envlist[scope].stack_[$];
+    else
+      $fatal("\nERROR: Stack corruption!! Bailing out...\n");
+
+`ifdef DEBUG
+    $write(" pop: scope: %0d, stack size: %0d ::  ", scope, envlist[scope].stack_.size());
+    if(d.sym) begin
+      $write(" sym");
+      dbg_str = d.sym.do_print();
+    end else begin
+      if (d.sval.len())
+        dbg_str = d.sval;
+      else
+        dbg_str = $sformatf("%0d", d.ival);
+    end
+
+    $write("%s\n", dbg_str);
+`endif
+    envlist[scope].stack_.pop_back();
+    return d;
+  endfunction
+
+  function Datum top();
+    return envlist[scope].stack_[$];
+  endfunction
+
+  function Symbol lookup(string s, Scope scope_ = ALL);
+    Symbol sym;
+    case(scope_)
+      ALL: begin
+             for (int sc = envlist.size() - 1; sc >= 0; sc--) begin
+                    sym = lookup_(s, sc);
+                    if (sym) break;
+             end
+           end
+      CURRENT: sym = lookup_(s, envlist.size() - 1);
+      GLOBAL:  sym = lookup_(s, 0);
+    endcase
+
+    if (sym)
+      return sym;
+
+    return null;
+  endfunction
+
+  function Symbol lookup_(string s, int scope_ = 0);
+    for (int i = 0; i < envlist[scope_].symlist.size(); i++) begin
+      Symbol sym = envlist[scope_].symlist[i];
+      if(sym.name == s)
+        return sym;
+    end
+    return null;
+  endfunction
+
+  task print_sym_table ();
+    string dbg_str = {"scope: ", $sformatf("%0d", scope), "\n"};
+    for (int unsigned i = 0; i < envlist.size(); i++) begin
+      dbg_str = {dbg_str, $sformatf(" %0d", i), ":  ", envlist[i].do_symlist_print(), "\n"};
+    end
+    $write("%s\n", dbg_str);
+  endtask
+
+  function Symbol install(string s, Type_ t);
+    Symbol sp = new();
+
+    sp.name = s;
+    sp.type_ = t;
+
+    envlist[scope].symlist.push_back(sp);
+
+`ifdef DEBUG
+    $display("install %s, sp: %p envlist[%0d].symlist: %p", s, sp, scope, envlist[scope].symlist);
+    print_sym_table();
+`endif
+
+    return sp;
+  endfunction
+
+  task inc_scope();
+    Env e = new();
+
+`ifdef DEBUG
+    $write("scope++\n");
+`endif
+    scope++;
+    envlist.push_back(e);
+  endtask
+
+  task free_env(Env e);
+    for (int i = 0; i < e.symlist.size(); i++)
+      if (e.symlist[i].u)
+          e.symlist[i].u = null;
+
+    for (int unsigned i = 0; i < e.stack_.size(); i++) begin
+      e.stack_.pop_back();
+    end
+  endtask
+
+  task dec_scope();
+    free_env(envlist[$]);
+    envlist.pop_back();
+`ifdef DEBUG
+    $write("scope--\n");
+    print_sym_table();
+`endif
+    scope--;
+  endtask
+
   extern virtual task visitProgram(Program p);
   extern virtual task visitStmt_Item(Stmt_Item p);
   extern virtual task visitVar_Assignment(Var_Assignment p);

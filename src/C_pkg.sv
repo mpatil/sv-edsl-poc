@@ -11,6 +11,36 @@ package C_pkg;
 `include "Interp.svh"
 `include "Printer.svh"
 
+
+  // Returns the index of first occurrence of string 'sub' within string 's''s given index range.
+  // Returns -1 otherwise.
+  function automatic int str_find(string s, string sub, int range_lo = 0, int range_hi = -1);
+    if (range_hi < 0 || range_hi >= s.len()) range_hi = s.len() - 1;
+    for (int i = range_lo; i <= (range_hi - sub.len() + 1); i++) begin
+      if (s.substr(i, i + sub.len() - 1) == sub) begin
+        return i;
+      end
+    end
+    return -1;
+  endfunction : str_find
+
+  // Find the first match string 'sub' in 's' and replace it with 'new_sub'.
+  // TODO: Add support for global replacement.
+  function automatic string str_replace(string s, string sub, string new_sub);
+    string str_before_sub, str_after_sub;
+    int lo_idx = str_find(s, sub);
+
+    // check sub string exists
+    if (!(lo_idx != -1))
+      return s;
+
+    // the new_str contains 3 portions {str_before_sub, new_sub, str_after_sub}
+    if (lo_idx > 0) str_before_sub = s.substr(0, lo_idx - 1);
+    if (lo_idx + sub.len() < s.len()) str_after_sub = s.substr(lo_idx + sub.len(), s.len() - 1);
+
+    return {str_before_sub, new_sub, str_after_sub};
+  endfunction : str_replace
+
 `include "Absyn.sv"
 `include "Interp.sv"
 `include "Printer.sv"

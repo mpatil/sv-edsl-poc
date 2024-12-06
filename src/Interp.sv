@@ -8,7 +8,6 @@
 
 `include "Interp.svh"
 
-
 task Interp::visitProgram(Program p); endtask //abstract class
 task Interp::visitStmt_Item(Stmt_Item p); endtask //abstract class
 task Interp::visitVar_Assignment(Var_Assignment p); endtask //abstract class
@@ -40,169 +39,267 @@ task Interp::visitNumber(Number p); endtask //abstract class
 task Interp::visitString_Literal(String_Literal p); endtask //abstract class
 
 task Interp::visitProgram1(Program1 p);
-  /* Code For Program1 Goes Here */
+  exit_fatal = 0;
 
   p.liststmt_item_.accept(this);
-
 endtask
 
 task Interp::visitVarDeclStmt(VarDeclStmt p);
-  /* Code For VarDeclStmt Goes Here */
+  Symbol s = lookup(p.ident_, CURRENT);
+  if(s == null)
+    s = install(p.ident_, UNDEF);
+  else
+    $write("\nWARNING: variable %s already declared: re-declared at line!!\n", s.name[0]);
 
-  visitIdent(p.ident_);
-
+  //visitIdent(p.ident_);
 endtask
 
 task Interp::visitVarAssDeclStmt(VarAssDeclStmt p);
-  /* Code For VarAssDeclStmt Goes Here */
-
+  var_install = 1;
   p.var_assignment_.accept(this);
-
 endtask
 
 task Interp::visitAssignmentStmt(AssignmentStmt p);
-  /* Code For AssignmentStmt Goes Here */
-
   p.var_assignment_.accept(this);
-
 endtask
 
 task Interp::visitConditionalStmt(ConditionalStmt p);
-  /* Code For ConditionalStmt Goes Here */
-
   p.conditional_stmt_.accept(this);
-
 endtask
 
 task Interp::visitIncDecOpStmt(IncDecOpStmt p);
-  /* Code For IncDecOpStmt Goes Here */
-
   visitIdent(p.ident_);
   p.inc_or_dec_operator_.accept(this);
-
 endtask
 
 task Interp::visitLoopStmt(LoopStmt p);
-  /* Code For LoopStmt Goes Here */
-
+  in_loop++;
   p.loop_stmt_.accept(this);
-
+  in_loop--;
 endtask
 
 task Interp::visitJumpStmt(JumpStmt p);
-  /* Code For JumpStmt Goes Here */
-
   p.jump_stmt_.accept(this);
-
 endtask
 
 task Interp::visitBlockStmt(BlockStmt p);
-  /* Code For BlockStmt Goes Here */
-
   p.liststmt_item_.accept(this);
-
 endtask
 
 task Interp::visitBuiltInStmt(BuiltInStmt p);
-  /* Code For BuiltInStmt Goes Here */
-
   p.builtin_task_.accept(this);
-
 endtask
 
 task Interp::visitProcDefStmt(ProcDefStmt p);
-  /* Code For ProcDefStmt Goes Here */
-
   p.proc_definition_.accept(this);
-
 endtask
 
 task Interp::visitFuncDefStmt(FuncDefStmt p);
-  /* Code For FuncDefStmt Goes Here */
-
   p.func_definition_.accept(this);
-
 endtask
 
 task Interp::visitProcCallStmt(ProcCallStmt p);
-  /* Code For ProcCallStmt Goes Here */
+  call_type = PROC;
 
   p.funcorproccall_.accept(this);
-
 endtask
 
 task Interp::visitAssignment(Assignment p);
-  /* Code For Assignment Goes Here */
 
+  Symbol s;
+  NumVal num;
+  Datum d1, d2;
+  Datum r1, r2;
+
+  p.expr_.accept(this);
+  d1 = pop();
+
+  if ( var_install ) begin
+    Symbol s_;
+
+    s_ = lookup(p.ident_, CURRENT);
+    if (s_)
+      $write("\nWARNING: variable %s already declared: re-declared at line!!\n", s_.name);
+    else
+      s_ = install(p.ident_, UNDEF);
+    var_install = 0;
+  end
   visitIdent(p.ident_);
   p.range_expr_opt_.accept(this);
-  p.expr_.accept(this);
 
+  r2 = pop();
+  r1 = pop();
+  d2 = pop();
+
+  s = d2.sym;
+
+  if ( s.type_ == UNDEF ) begin
+    num = new();
+    s.u = num;
+  end else begin
+    $cast(num, s.u);
+  end
+
+  if ( r2.ival > 63 || r2.ival < 0 ) begin
+    $fatal("\nERROR: bad bit select range value for variable %s: %0d at line !!\n", s.name, uint'(r2.ival));
+  end
+
+  if ( r1.ival > 63 || r1.ival < 0 ) begin
+    $fatal("\nERROR: bad bit select range value for variable %s: %0d at line !!\n", s.name, uint'(r1.ival));
+  end
+
+  if ( r2.ival > r1.ival ) begin
+    $fatal("\nERROR: bad bit select range values for variable %s: %0d:%0d at line!!\n", s.name, uint'(r1.ival), uint'(r2.ival));
+  end
+
+  if ( longint'(r1.ival - r2.ival + 1) < 64 ) begin
+    ulongint mask = (ulongint'(1) << ulongint'(r1.ival - r2.ival + 1)) - 1;
+
+    if ( d1.ival > mask )
+      $write("\nWARNING: RHS(%0d) larger than LHS range max (%0d) in assignment to variable %s at line!!\n", ulongint'(d1.ival), ulongint'(mask), s.name);
+
+    d1.ival = real'(ulongint'(d1.ival) & ulongint'(mask));
+
+    mask = ~(mask << ulongint'(r2.ival));
+    num.val = ulongint'(num.val) & mask;
+
+    num.val = real'(ulongint'(num.val) | (ulongint'(d1.ival) << ulongint'(r2.ival)));
+  end else
+    num.val = d1.ival;
+
+  s.type_ = VAR;
 endtask
 
 task Interp::visitBreak(Break p);
-  /* Code For Break Goes Here */
-
-
+  break_jump = 1;
 endtask
 
 task Interp::visitContinue(Continue p);
-  /* Code For Continue Goes Here */
-
-
+  continue_jump = 1;
 endtask
 
 task Interp::visitReturn(Return p);
-  /* Code For Return Goes Here */
-
   p.expr_opt_.accept(this);
 
+`ifdef DEBUG
+  $write("returning\n");
+`endif
+  return_jump = 1;
 endtask
 
 task Interp::visitCall(Call p);
-  /* Code For Call Goes Here */
+  Datum d1, d2;
+  Symbol s;
+  ProcDefn def;
+  real args[$];
+  Type_ call_type_ = call_type;
 
   visitIdent(p.ident_);
-  p.listexpr_.accept(this);
 
+  d1 = pop();
+  s = d1.sym;
+  if ( s.type_ == UNDEF || !(s.type_ == FUNC || s.type_ == PROC) )
+    $fatal("\nERROR: procedure or function \"%s\" not defined but called at line!!\n", d1.sym.name);
+  $cast(def, s.u);
+
+  if ( p.listexpr_.v.size() != def.formals.size() )
+    $fatal("\nERROR: Number of args for procedure or function \"%s\" must match number of parameters in definition. At line!!\n", d1.sym.name);
+
+  p.listexpr_.accept(this);
+  for (uint i = 0; i < def.formals.size(); i++) begin
+    Datum d;
+    d = pop();
+    args.push_back(d.ival);
+  end
+
+  in_call++;
+  inc_scope();
+  for ( uint i = 0; i < def.formals.size(); i++ ) begin
+    Symbol s1;
+    NumVal num = new();
+
+    s1 = install(def.formals[i], UNDEF);
+    s1.type_ = VAR;
+
+    num.val = args[i];
+
+    s1.u = num;
+`ifdef DEBUG
+    begin
+      string dbg_str = s1.do_print();
+      $write("Symbol: %s\n", dbg_str);
+    end
+`endif
+  end
+  def.code.accept(this);
+  if ( return_jump ) begin
+    return_jump = 0;
+  end else if ( call_type_ == FUNC ) begin
+    $fatal("\nERROR: function \"%s\" must return a value. At line!!\n", d1.sym.name);
+  end
+`ifdef DEBUG
+  $write("returned. scope = %0d in_call = %0d\n", scope, in_call);
+`endif
+  if ( call_type_ == FUNC )
+    d2 = pop();
+  dec_scope();
+  in_call--;
+  if ( call_type_ == FUNC )
+    push(d2);
 endtask
 
 task Interp::visitPrint(Print p);
-  /* Code For Print Goes Here */
-
   p.listprint_arg_.accept(this);
-
 endtask
 
 task Interp::visitRegWr(RegWr p);
-  /* Code For RegWr Goes Here */
+  Datum d1, d2, d3;
 
   p.bar_.accept(this);
   p.expr_1.accept(this);
   p.expr_2.accept(this);
 
+  d3 = pop();
+  d2 = pop();
+  d1 = pop();
+
+  $write("writing csr: %0d %0d %0d\n", ulongint'(d1.ival), ulongint'(d2.ival), ulongint'(d3.ival));
 endtask
 
 task Interp::visitWait(Wait p);
-  /* Code For Wait Goes Here */
+  Datum d;
 
   p.expr_.accept(this);
 
+  d = pop();
+  #d;
 endtask
 
 task Interp::visitFatal(Fatal p);
-  /* Code For Fatal Goes Here */
+  Datum d;
 
   p.expr_.accept(this);
 
+  d = pop();
+
+  $fatal("FATAL: %d !!!!\n", uint'(d.ival));
+  exit_fatal = uint'(d.ival);
 endtask
 
 task Interp::visitRegRd(RegRd p);
-  /* Code For RegRd Goes Here */
+  Datum d1, d2;
+  uint data = 0;
 
   p.bar_.accept(this);
   p.expr_.accept(this);
 
+  d2 = pop();
+  d1 = pop();
+
+  //data = read_csr( (unsigned long) d1.ival, (unsigned long) d2.ival );
+  data = 0;
+  d1.ival = data;
+  push(d1);
 endtask
 
 task Interp::visitWaitInterrupt(WaitInterrupt p);
@@ -214,488 +311,634 @@ task Interp::visitWaitInterrupt(WaitInterrupt p);
 endtask
 
 task Interp::visitCeil(Ceil p);
-  /* Code For Ceil Goes Here */
+  Datum d;
 
   p.expr_.accept(this);
+  d = pop();
 
+  d.ival = $ceil(d.ival);
+  push(d);
 endtask
 
 task Interp::visitFloor(Floor p);
-  /* Code For Floor Goes Here */
+  Datum d;
 
   p.expr_.accept(this);
+  d = pop();
 
+  d.ival = $floor(d.ival);
+  push(d);
 endtask
 
 task Interp::visitLog2(Log2 p);
-  /* Code For Log2 Goes Here */
+  Datum d;
 
   p.expr_.accept(this);
+  d = pop();
 
+  d.ival = $clog2(uint'(d.ival));
+
+  push(d);
 endtask
 
 task Interp::visitSys(Sys p);
-  /* Code For Sys Goes Here */
+  Datum d;
+  string u;
 
   p.string_literal_.accept(this);
+  d = pop();
 
+  u = d.sval;
+
+  $write("sys %s\n", u);
+
+  d.ival = $system(u);
+  push(d);
 endtask
 
 task Interp::visitIsDefd(IsDefd p);
-  /* Code For IsDefd Goes Here */
+  Datum d;
+  Symbol s = lookup(p.ident_);
 
-  visitIdent(p.ident_);
+  if ( s == null )
+    d.ival = 0;
+  else
+    d.ival = 1;
 
+  push(d);
 endtask
 
 task Interp::visitBar_(Bar_ p);
-  /* Code For Bar_ Goes Here */
-
   p.expr_.accept(this);
-
 endtask
 
 task Interp::visitPrExpr(PrExpr p);
-  /* Code For PrExpr Goes Here */
+  Datum d;
+  string str;
 
   p.expr_.accept(this);
 
+  d = pop();
+
+  str.itoa(d.ival);
+  prstr = {prstr, str};
 endtask
 
 task Interp::visitPrString(PrString p);
-  /* Code For PrString Goes Here */
+  Datum d;
+  string str;
 
   p.string_literal_.accept(this);
+  d = pop();
 
+  str = str_replace(d.sval.substr(1, d.sval.len() - 2), "\\n", "\n");
+  str = str_replace(str, "\\t", "\t");
+  prstr = {prstr, str};
 endtask
 
 task Interp::visitPrHex(PrHex p);
-  /* Code For PrHex Goes Here */
+  Datum d;
+  string str;
 
   p.expr_.accept(this);
 
+  d = pop();
+
+  str.hextoa(d.ival);
+  prstr = {prstr, str};
 endtask
 
 task Interp::visitPrBin(PrBin p);
-  /* Code For PrBin Goes Here */
+  Datum d;
+  string str;
 
   p.expr_.accept(this);
 
+  d = pop();
+
+  str.bintoa(d.ival);
+  prstr = {prstr, str};
 endtask
 
 task Interp::visitProcDef(ProcDef p);
-  /* Code For ProcDef Goes Here */
-
+  defn_type = PROC;
   p.definition_.accept(this);
-
 endtask
 
 task Interp::visitFuncDef(FuncDef p);
-  /* Code For FuncDef Goes Here */
-
+  defn_type = FUNC;
   p.definition_.accept(this);
-
 endtask
 
 task Interp::visitDefn(Defn p);
-  /* Code For Defn Goes Here */
+  Datum d1, d2;
+  Symbol s;
+  ProcDefn def = new();
 
   visitIdent(p.ident_);
-  p.listformal_arg_.accept(this);
-  p.stmt_item_.accept(this);
+  d1 = pop();
+  s = d1.sym;
+  if ( s.type_ != UNDEF )
+    $fatal("\nERROR: using a pre-defined variable \"%s\" for function or procedure name at line %%0d!!\n", d1.sym.name/*, p->line_number*/);
+  s.type_ = defn_type;
 
+  p.listformal_arg_.accept(this);
+
+  for (uint i = 0; i < p.listformal_arg_.v.size(); i++) begin
+    Datum f1;
+
+    f1 = pop();
+    def.formals.push_back(f1.sval);
+  end
+  /*
+   * p.stmt_item_.accept(this);
+   */
+  def.code = p.stmt_item_;
+
+  s.u = def;
 endtask
 
 task Interp::visitFormal(Formal p);
-  /* Code For Formal Goes Here */
+  Datum d;
 
-  visitIdent(p.ident_);
+  d.sval = p.ident_;
+  push(d);
 
+  //visitIdent(p.ident_);
 endtask
 
 task Interp::visitElsIf(ElsIf p);
-  /* Code For ElsIf Goes Here */
+  Datum d;
 
+  pop();
   p.expr_.accept(this);
-  p.stmt_item_.accept(this);
 
+  d = top();
+  if ( d.ival )
+    p.stmt_item_.accept(this);
 endtask
 
 task Interp::visitElseIsEmpty(ElseIsEmpty p);
-  /* Code For ElseIsEmpty Goes Here */
-
-
 endtask
 
 task Interp::visitElseIsElse(ElseIsElse p);
-  /* Code For ElseIsElse Goes Here */
-
   p.stmt_item_.accept(this);
-
 endtask
 
 task Interp::visitIf(If p);
-  /* Code For If Goes Here */
+  Datum d;
 
   p.expr_.accept(this);
-  p.stmt_item_.accept(this);
-  p.listelse_if_.accept(this);
-  p.else_opt_.accept(this);
+
+  d = top();
+  if ( d.ival )
+    p.stmt_item_.accept(this);
+  else
+    p.listelse_if_.accept(this);
+
+  d = top();
+  if (! d.ival )
+    p.else_opt_.accept(this);
+
+`ifdef DEBUG
+  $write("popping if \n");
+`endif
+  //pop();
 
 endtask
 
 task Interp::visitWhile(While p);
-  /* Code For While Goes Here */
+  Datum d;
 
   p.expr_.accept(this);
-  p.stmt_item_.accept(this);
+  d = pop();
 
+  while ( d.ival != 0 ) begin
+    p.stmt_item_.accept(this);
+
+    if ( break_jump || return_jump ) begin
+      break_jump = 0;
+      break;
+    end
+
+    if ( continue_jump )
+      continue_jump = 0;
+
+    p.expr_.accept(this);
+    d = pop();
+  end
 endtask
 
 task Interp::visitFor(For p);
-  /* Code For For Goes Here */
+  Datum d;
 
   p.for_init_opt_.accept(this);
   p.expr_opt_.accept(this);
-  p.for_step_opt_.accept(this);
-  p.stmt_item_.accept(this);
+  d = pop();
 
+  while( d.ival ) begin
+    p.stmt_item_.accept(this);
+
+    if( break_jump || return_jump ) begin
+      break_jump = 0;
+      break;
+    end
+
+    if( continue_jump )
+      continue_jump = 0;
+
+    p.for_step_opt_.accept(this);
+
+    p.expr_opt_.accept(this);
+    d = pop();
+  end
 endtask
 
 task Interp::visitForInitIsEmpty(ForInitIsEmpty p);
-  /* Code For ForInitIsEmpty Goes Here */
-
-
 endtask
 
 task Interp::visitForInitIsInit(ForInitIsInit p);
-  /* Code For ForInitIsInit Goes Here */
-
   p.var_assignment_.accept(this);
-
 endtask
 
 task Interp::visitForInitIsVarInit(ForInitIsVarInit p);
-  /* Code For ForInitIsVarInit Goes Here */
-
+  var_install = 1;
   p.var_assignment_.accept(this);
-
 endtask
 
 task Interp::visitExprIsEmpty(ExprIsEmpty p);
-  /* Code For ExprIsEmpty Goes Here */
-
-
+  Datum d;
+  d.ival = 1;
+  push(d);
 endtask
 
 task Interp::visitExprIsExpr(ExprIsExpr p);
-  /* Code For ExprIsExpr Goes Here */
-
   p.expr_.accept(this);
-
 endtask
 
 task Interp::visitForStepIsEmpty(ForStepIsEmpty p);
-  /* Code For ForStepIsEmpty Goes Here */
-
-
 endtask
 
 task Interp::visitForStepIsAssignment(ForStepIsAssignment p);
-  /* Code For ForStepIsAssignment Goes Here */
-
   p.var_assignment_.accept(this);
-
 endtask
 
 task Interp::visitForStepIsIncOrDec(ForStepIsIncOrDec p);
-  /* Code For ForStepIsIncOrDec Goes Here */
-
   visitIdent(p.ident_);
   p.inc_or_dec_operator_.accept(this);
-
 endtask
 
 task Interp::visitPow(Pow p);
-  /* Code For Pow Goes Here */
-
-
+  binary_op = POW;
 endtask
 
 task Interp::visitMul(Mul p);
-  /* Code For Mul Goes Here */
-
-
+  binary_op = MUL;
 endtask
 
 task Interp::visitDiv(Div p);
-  /* Code For Div Goes Here */
-
-
+  binary_op = DIV;
 endtask
 
 task Interp::visitMod(Mod p);
-  /* Code For Mod Goes Here */
-
-
+  binary_op = MOD;
 endtask
 
 task Interp::visitAdd(Add p);
-  /* Code For Add Goes Here */
-
-
+  binary_op = ADD;
 endtask
 
 task Interp::visitSub(Sub p);
-  /* Code For Sub Goes Here */
-
-
+  binary_op = SUB;
 endtask
 
 task Interp::visitLAnd(LAnd p);
-  /* Code For LAnd Goes Here */
-
-
+  binary_op = LAND;
 endtask
 
 task Interp::visitXor(Xor p);
-  /* Code For Xor Goes Here */
-
-
+  binary_op = XOR;
 endtask
 
 task Interp::visitLOr(LOr p);
-  /* Code For LOr Goes Here */
-
-
+  binary_op = LOR;
 endtask
 
 task Interp::visitRsh(Rsh p);
-  /* Code For Rsh Goes Here */
-
-
+  binary_op = RSH;
 endtask
 
 task Interp::visitLsh(Lsh p);
-  /* Code For Lsh Goes Here */
-
-
+  binary_op = LSH;
 endtask
 
 task Interp::visitLt(Lt p);
-  /* Code For Lt Goes Here */
-
-
+  binary_op = LT;
 endtask
 
 task Interp::visitLeq(Leq p);
-  /* Code For Leq Goes Here */
-
-
+  binary_op = LEQ;
 endtask
 
 task Interp::visitGt(Gt p);
-  /* Code For Gt Goes Here */
-
-
+  binary_op = GT;
 endtask
 
 task Interp::visitGeq(Geq p);
-  /* Code For Geq Goes Here */
-
-
+  binary_op = GEQ;
 endtask
 
 task Interp::visitEq(Eq p);
-  /* Code For Eq Goes Here */
-
-
+  binary_op = EQ;
 endtask
 
 task Interp::visitNeq(Neq p);
-  /* Code For Neq Goes Here */
-
-
+  binary_op = NEQ;
 endtask
 
 task Interp::visitAnd(And p);
-  /* Code For And Goes Here */
-
-
+  binary_op = AND;
 endtask
 
 task Interp::visitOr(Or p);
-  /* Code For Or Goes Here */
-
-
+  binary_op = OR;
 endtask
 
 task Interp::visitExprPrim(ExprPrim p);
-  /* Code For ExprPrim Goes Here */
-
   p.primary_.accept(this);
-
 endtask
 
 task Interp::visitExprUnary(ExprUnary p);
-  /* Code For ExprUnary Goes Here */
+  Datum d;
+  UnaryOp op;
 
   p.unary_operator_.accept(this);
+  op = unary_op;
   p.expr_.accept(this);
+
+  d = pop();
+  case(op)
+    MINUS: d.ival = -1 * d.ival;
+    NOT:   d.ival = (! d.ival);
+    COMP:  d.ival = real'( ((ulongint'(~(uint'(ulongint'(d.ival) >> 32))) << 32) & (~0 >> 1)) | ((~uint'(d.ival))) );
+  endcase
+  push(d);
 
 endtask
 
 task Interp::visitExprBltin(ExprBltin p);
-  /* Code For ExprBltin Goes Here */
-
   p.builtin_fn_.accept(this);
-
 endtask
 
 task Interp::visitExprFuncCall(ExprFuncCall p);
-  /* Code For ExprFuncCall Goes Here */
-
+  call_type = FUNC;
   p.funcorproccall_.accept(this);
-
 endtask
 
 task Interp::visitExprTernary(ExprTernary p);
-  /* Code For ExprTernary Goes Here */
+  Datum d1, d2, d3;
+  Datum d;
 
   p.expr_1.accept(this);
-  p.expr_2.accept(this);
-  p.expr_3.accept(this);
+  d1 = pop();
 
+  if( d1.ival ) begin
+    p.expr_2.accept(this);
+    d2 = pop();
+
+    push(d2);
+  end else begin
+    p.expr_3.accept(this);
+    d3 = pop();
+
+    push(d3);
+  end
 endtask
 
 task Interp::visitEOp(EOp p);
-  /* Code For EOp Goes Here */
+
+  Datum d1, d2, d3;
+  BinaryOp op;
 
   p.expr_1.accept(this);
   p.op_.accept(this);
+  op = binary_op;
   p.expr_2.accept(this);
 
+  d2 = pop();
+  d1 = pop();
+
+  case(op)
+    POW: d3.ival = real'($pow(real'(d1.ival), real'(d2.ival)));
+    MUL: d3.ival = d1.ival * d2.ival;
+    DIV: begin
+           if ( d2.ival == 0.0 ) begin
+             $fatal("\nERROR: division by zero at line!!\n" /*, p.line_number*/);
+           end
+           d3.ival = d1.ival / d2.ival;
+         end
+    MOD: begin
+           if ( longint'(d2.ival) == 0 ) begin
+             $fatal("\nERROR: mod by zero at line %0d!!\n"/*, p.line_number*/);
+           end
+           d3.ival = real'(longint'(d1.ival) % longint'(d2.ival));
+         end
+    ADD: d3.ival = d1.ival + d2.ival;
+    SUB: d3.ival = d1.ival - d2.ival;
+    LAND:d3.ival = real'(ulongint'(d1.ival) &  ulongint'(d2.ival));
+    XOR: d3.ival = real'(ulongint'(d1.ival) ^  ulongint'(d2.ival));
+    LOR: d3.ival = real'(ulongint'(d1.ival) |  ulongint'(d2.ival));
+    RSH: d3.ival = real'(ulongint'(d1.ival) >> uint'(d2.ival));
+    LSH: d3.ival = real'(ulongint'(d1.ival) << ulongint'(d2.ival));
+    LT:  d3.ival = real'(d1.ival <  d2.ival);
+    LEQ: d3.ival = real'(d1.ival <= d2.ival);
+    GT:  d3.ival = real'(d1.ival >  d2.ival);
+    GEQ: d3.ival = real'(d1.ival >= d2.ival);
+    EQ:  d3.ival = real'(d1.ival == d2.ival);
+    NEQ: d3.ival = real'(d1.ival != d2.ival);
+    AND: d3.ival = real'(d1.ival && d2.ival);
+    OR:  d3.ival = real'(d1.ival || d2.ival);
+    default:    $fatal("\nERROR: Unhandled op at line !!\n"/*, p.line_number*/);
+  endcase
+
+`ifdef DEBUG
+  $write("evaluated expression %0d\n", uint'(op));
+`endif
+  push(d3);
 endtask
 
 task Interp::visitPrimIdent(PrimIdent p);
-  /* Code For PrimIdent Goes Here */
+
+  Datum d, d1, r1, r2;
+  ulongint mask = -1;
+  NumVal num;
 
   visitIdent(p.ident_);
+
+  d = pop();
+  if ( d.sym.type_ != VAR && d.sym.type_ != UNDEF ) begin
+    $fatal("\nERROR: attempt to evaluate a non variable at line 0d!!\n"/*, p.line_number*/);
+  end
+  if ( d.sym.type_ == UNDEF ) begin
+    $fatal("\nERROR: undefined variable \"%s\" at line 0d!!\n", d.sym.name/*, p.line_number*/);
+  end
+
   p.range_expr_opt_.accept(this);
 
+  r2 = pop();
+  if ( r2.ival > 63 || r2.ival < 0 ) begin
+    $fatal("\nERROR: bad range value: %0d at line %0d!!\n", uint'(r2.ival)/*, p.line_number*/);
+  end
+
+  r1 = pop();
+  if ( r1.ival > 63 || r1.ival < 0 ) begin
+    $fatal("\nERROR: bad range values: %0d at line %%0d!!\n", uint'(r1.ival)/*, p.line_number*/);
+  end
+
+  if ( r2.ival > r1.ival ) begin
+    $fatal("\nERROR: bad range values: %0d:%0d at line %%0d!!\n", uint'(r1.ival), uint'(r2.ival)/*, p.line_number*/);
+  end
+
+  $cast(num, d.sym.u);
+
+  if ( ulongint'(r1.ival - r2.ival + 1) < 64 ) begin
+    mask = (1 << ulongint'(r1.ival - r2.ival + 1)) - 1;
+    d1.ival = real'((ulongint'(num.val) >> ulongint'(r2.ival)) & mask);
+  end else
+    d1.ival = real'(num.val);
+
+  push(d1);
 endtask
 
 task Interp::visitPrimNumber(PrimNumber p);
-  /* Code For PrimNumber Goes Here */
-
   p.number_.accept(this);
-
 endtask
 
 task Interp::visitRangeExprIsEmpty(RangeExprIsEmpty p);
-  /* Code For RangeExprIsEmpty Goes Here */
+  Datum d1, d2;
+  d1.ival = 0;
+  d2.ival = 63;
 
-
+  push(d2);
+  push(d1);
 endtask
 
 task Interp::visitRangeExprIsRange(RangeExprIsRange p);
-  /* Code For RangeExprIsRange Goes Here */
-
   p.range_expr_.accept(this);
-
 endtask
 
 task Interp::visitRangeExprBit(RangeExprBit p);
-  /* Code For RangeExprBit Goes Here */
+  Datum d1, d2;
 
   p.expr_.accept(this);
+  d1 = pop();
 
+  d2.ival = d1.ival;
+
+  push(d2);
+  push(d1);
 endtask
 
 task Interp::visitRangeExprRange(RangeExprRange p);
-  /* Code For RangeExprRange Goes Here */
 
   p.expr_1.accept(this);
   p.expr_2.accept(this);
-
 endtask
 
 task Interp::visitUnaryPlus(UnaryPlus p);
-  /* Code For UnaryPlus Goes Here */
-
-
+  unary_op = PLUS;
 endtask
 
 task Interp::visitUnaryMinus(UnaryMinus p);
-  /* Code For UnaryMinus Goes Here */
-
-
+  unary_op = MINUS;
 endtask
 
 task Interp::visitUnaryNot(UnaryNot p);
-  /* Code For UnaryNot Goes Here */
-
-
+  unary_op = NOT;
 endtask
 
 task Interp::visitUnaryComp(UnaryComp p);
-  /* Code For UnaryComp Goes Here */
-
-
+  unary_op = COMP;
 endtask
 
 task Interp::visitIncr(Incr p);
-  /* Code For Incr Goes Here */
+  Symbol s;
+  Datum d;
+  NumVal num;
 
-
+  d = pop();
+  s = d.sym;
+  $cast(num, s.u);
+  num.val++;
 endtask
 
 task Interp::visitDecr(Decr p);
-  /* Code For Decr Goes Here */
+  Symbol s;
+  Datum d;
+  NumVal num;
 
-
+  d = pop();
+  s = d.sym;
+  $cast(num, s.u);
+  num.val--;
 endtask
 
 task Interp::visitDecimal(Decimal p);
-  /* Code For Decimal Goes Here */
-
   visitDecimal_Number(p.decimal_number_);
-
 endtask
 
 task Interp::visitBinary(Binary p);
-  /* Code For Binary Goes Here */
-
   visitBinaryNumber(p.binarynumber_);
-
 endtask
 
 task Interp::visitHex(Hex p);
-  /* Code For Hex Goes Here */
-
   visitHexNumber(p.hexnumber_);
-
 endtask
 
 task Interp::visitReal(Real p);
-  /* Code For Real Goes Here */
-
   visitReal_Number(p.real_number_);
-
 endtask
 
 task Interp::visitStringLit(StringLit p);
-  /* Code For StringLit Goes Here */
-
   visitAnyChars(p.anychars_);
-
 endtask
 
-
 task Interp::visitListStmt_Item(ListStmt_Item  liststmt_item);
-  for ( int i = 0; i < liststmt_item.v.size() ; i++)
-  begin
+  Datum d;
+
+  inc_scope();
+
+  if ( exit_fatal )
+    return;
+
+  for (uint i = 0; i < liststmt_item.v.size(); i++) begin
+`ifdef DEBUG
+    //$write("line: %0d\n", liststmt_item.v[i].line_number);
+`endif
     liststmt_item.v[i].accept(this);
+    if ( return_jump && in_call ) begin
+`ifdef DEBUG
+      $write("line: , return_jump = %0d\n", /*liststmt_item.v[i].line_number,*/ return_jump);
+`endif
+      d = pop();
+      break;
+    end
+    if ( (break_jump || continue_jump) && in_loop ) begin
+      break;
+    end
+    if ( exit_fatal )
+      break;
+  end
+
+  if (scope == top_scope) begin
+`ifdef DEBUG
+     print_sym_table();
+`endif
+  end else
+    dec_scope();
+
+  if ( return_jump && in_call ) begin
+    push(d);
   end
 endtask
 
@@ -707,10 +950,12 @@ task Interp::visitListExpr(ListExpr  listexpr);
 endtask
 
 task Interp::visitListPrint_Arg(ListPrint_Arg  listprint_arg);
+  prstr = "";
   for ( int i = 0; i < listprint_arg.v.size() ; i++)
   begin
     listprint_arg.v[i].accept(this);
   end
+  $write(prstr);
 endtask
 
 task Interp::visitListFormal_Arg(ListFormal_Arg  listformal_arg);
@@ -721,31 +966,56 @@ task Interp::visitListFormal_Arg(ListFormal_Arg  listformal_arg);
 endtask
 
 task Interp::visitListElse_If(ListElse_If  listelse_if);
+  Datum d;
+
   for ( int i = 0; i < listelse_if.v.size() ; i++)
   begin
     listelse_if.v[i].accept(this);
+
+    d = top();
+    if (d.ival) return;
   end
 endtask
 
 
 task Interp::visitDecimal_Number(Decimal_Number x);
-  /* Code for Decimal_Number Goes Here */
+  Datum d;
+
+  d.ival = x.atoi();
+
+  push(d);
 endtask
 
 task Interp::visitReal_Number(Real_Number x);
-  /* Code for Real_Number Goes Here */
+  Datum d;
+
+  d.ival = x.atoreal();
+
+  push(d);
 endtask
 
 task Interp::visitBinaryNumber(BinaryNumber x);
-  /* Code for BinaryNumber Goes Here */
+  Datum d;
+
+  d.ival = x.atobin();
+
+  push(d);
 endtask
 
 task Interp::visitHexNumber(HexNumber x);
-  /* Code for HexNumber Goes Here */
+  Datum d;
+
+  d.ival = x.atohex();
+
+  push(d);
 endtask
 
 task Interp::visitAnyChars(AnyChars x);
-  /* Code for AnyChars Goes Here */
+  Datum d;
+
+  d.sval = x;
+
+  push(d);
 endtask
 
 task Interp::visitInteger(Integer x);
@@ -765,8 +1035,11 @@ task Interp::visitString(String x);
 endtask
 
 task Interp::visitIdent(Ident x);
-  /* Code for Ident Goes Here */
+  Datum d;
+  Symbol s = lookup(x);
+
+  if ( s == null )
+    s = install(x, UNDEF);
+  d.sym = s;
+  push(d);
 endtask
-
-
-

@@ -1385,9 +1385,8 @@ function Program pProgram(string filename);
 endfunction
 
 /* Entrypoint: parse Program from string. */
-`ifdef XXX
-function int psProgram(string str);
-  b = Bopen(filename, `OREAD);
+function Program psProgram(string str);
+  b = Bopens(str);
   yy_mylinenumber = 1;
   initialize_lexer(0);
   if (yyparse())
@@ -1395,7 +1394,6 @@ function int psProgram(string str);
   else
     return YY_RESULT_Program_;/* Success */
 endfunction
-`endif
 
 
 

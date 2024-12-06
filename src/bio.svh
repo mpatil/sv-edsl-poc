@@ -36,11 +36,12 @@
 `define      AREAD       4       /* read access */
 
 typedef class Biobuf;
+typedef byte unsigned bus[];
 
 static   Biobuf wbufs[`MAXBUFS];
 static   int    atexitflag;
 
-typedef enum {_file, _process} Type;
+typedef enum {_file, _process, _string} Type;
 
 class Biobuf;
   int              icount = 0;      /* neg num of bytes at eob */
@@ -55,15 +56,19 @@ class Biobuf;
   int              ebuf;            /* pointer to end of buffer */
   int              gbuf;            /* pointer to good data in buf */
   byte unsigned    b[`Bungetsize+`Bsize];
+  byte unsigned    s_[];
   Type             ty = _file;
 
-  function new(int unsigned f = 0, int mode = `OREAD, Type ty = _file);
-    void'(Binits(f, mode, `Bungetsize +`Bsize));
+  function new(int unsigned f = 0, int mode = `OREAD, string s = "", Type ty = _file);
+    if (ty == _file)
+        void'(Binit(f, mode, `Bungetsize +`Bsize));
+    else
+        void'(Binits(s, `Bungetsize +`Bsize));
     flag = `Bmagic;
     this.ty = ty;
   endfunction
 
-  function int Binits(int unsigned f, int mode, int size);
+  function int Binit(int unsigned f, int mode, int size);
     int p = 0;
     p += `Bungetsize;   /* make room for Bungets */
     size -= `Bungetsize;
@@ -92,8 +97,23 @@ class Biobuf;
     return 0;
   endfunction
 
-  function int Binit(int unsigned f, int mode);
-    return Binits(f, mode, `Bungetsize +`Bsize);
+  function int Binits(string s, int size);
+    int p = 0;
+
+    p += `Bungetsize;   /* make room for Bungets */
+    size -= `Bungetsize;
+
+    state = `Bractive;
+    ocount = 0;
+
+    s_ = new[s.len()];
+    s_ = bus'(s);
+
+    bbuf = p;
+    ebuf = p + size;
+    bsize = size;
+    gbuf = ebuf;
+    return 0;
   endfunction
 
   task close();
@@ -106,6 +126,7 @@ class Biobuf;
   function int read(int bbuf_, int bsize_);
     case(ty)
       _file:      read = $fread(b, fid, bbuf_, bsize_);
+      _string:    begin for (int i = 0; i < bsize_; i++) b[i + bbuf_] = s_[i]; read = bsize_; end
       _process:   $error("not supported");
     endcase
   endfunction
@@ -113,6 +134,7 @@ class Biobuf;
   task write(byte unsigned s[], int unsigned start, int unsigned count);
     case(ty)
       _file:      for (int i = start; i < start + count; i++) $fwrite(fid, "%c", s[i]);
+      _string:    for (int i = start; i < start + count; i++) s_[i] = s[i];
       _process:   $error("not supported");
     endcase
   endtask
@@ -120,6 +142,7 @@ class Biobuf;
   task flush();
     case(ty)
       _file:      $fflush(fid);
+      _string:    $write("flushing\n");
       _process:   $error("not supported");
     endcase
   endtask
@@ -127,6 +150,7 @@ class Biobuf;
   function int seek(int offset_, int op_);
     case(ty)
       _file:      seek = $fseek(fid, offset_, op_);
+      _string:    $write("seeking at %0d offset ; %0d\n", offset_, op_);
       _process:   $error("not supported");
     endcase
   endfunction
@@ -561,9 +585,14 @@ function Biobuf Bopen(string name, int mode);
       return null;
     end
   endcase
-  Bopen = new(f, mode);
+  Bopen = new(.f(f), .mode(mode));
   if(Bopen == null)
     $fclose(f);
 endfunction
+
+function Biobuf Bopens(string s);
+  Bopens = new(.s(s), .ty(_string));
+endfunction
+
 
 `endif
