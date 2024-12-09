@@ -15,7 +15,6 @@ task Interp::visitJump_Stmt(Jump_Stmt p); endtask //abstract class
 task Interp::visitFuncOrProcCall(FuncOrProcCall p); endtask //abstract class
 task Interp::visitBuiltin_Task(Builtin_Task p); endtask //abstract class
 task Interp::visitBuiltin_Fn(Builtin_Fn p); endtask //abstract class
-task Interp::visitBar(Bar p); endtask //abstract class
 task Interp::visitPrint_Arg(Print_Arg p); endtask //abstract class
 task Interp::visitProc_Definition(Proc_Definition p); endtask //abstract class
 task Interp::visitFunc_Definition(Func_Definition p); endtask //abstract class
@@ -255,15 +254,13 @@ endtask
 task Interp::visitRegWr(RegWr p);
   Datum d1, d2, d3;
 
-  p.bar_.accept(this);
   p.expr_1.accept(this);
   p.expr_2.accept(this);
 
   d3 = pop();
   d2 = pop();
-  d1 = pop();
 
-  $write("writing csr: %0d %0d %0d, at line %0d\n", ulongint'(d1.ival), ulongint'(d2.ival), ulongint'(d3.ival), p.line_number);
+  $write("writing csr: %0d %0d, at line %0d\n", ulongint'(d2.ival), ulongint'(d3.ival), p.line_number);
 endtask
 
 task Interp::visitWait(Wait p);
@@ -287,19 +284,17 @@ task Interp::visitFatal(Fatal p);
 endtask
 
 task Interp::visitRegRd(RegRd p);
-  Datum d1, d2;
+  Datum d2;
   uint data = 0;
 
-  p.bar_.accept(this);
   p.expr_.accept(this);
 
   d2 = pop();
-  d1 = pop();
 
-  //data = read_csr( (unsigned long) d1.ival, (unsigned long) d2.ival );
+  //data = read_csr( (unsigned long) d2.ival );
   data = 0;
-  d1.ival = data;
-  push(d1);
+  d2.ival = data;
+  push(d2);
 endtask
 
 task Interp::visitWaitInterrupt(WaitInterrupt p);
@@ -366,10 +361,6 @@ task Interp::visitIsDefd(IsDefd p);
     d.ival = 1;
 
   push(d);
-endtask
-
-task Interp::visitBar_(Bar_ p);
-  p.expr_.accept(this);
 endtask
 
 task Interp::visitPrExpr(PrExpr p);

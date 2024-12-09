@@ -235,10 +235,9 @@ endtask
 
 
 /********************   RegWr    ********************/
-function RegWr::new(Bar p1, Expr p2, Expr p3);
-  bar_ = p1;
-  expr_1 = p2;
-  expr_2 = p3;
+function RegWr::new(Expr p1, Expr p2);
+  expr_1 = p1;
+  expr_2 = p2;
 
 endfunction
 
@@ -273,9 +272,8 @@ endtask
 
 
 /********************   RegRd    ********************/
-function RegRd::new(Bar p1, Expr p2);
-  bar_ = p1;
-  expr_ = p2;
+function RegRd::new(Expr p1);
+  expr_ = p1;
 
 endfunction
 
@@ -354,18 +352,6 @@ endfunction
 
 task IsDefd::accept(Visitor v);
   v.visitIsDefd(this);
-endtask
-
-
-
-/********************   Bar_    ********************/
-function Bar_::new(Expr p1);
-  expr_ = p1;
-
-endfunction
-
-task Bar_::accept(Visitor v);
-  v.visitBar_(this);
 endtask
 
 

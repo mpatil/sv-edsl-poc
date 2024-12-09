@@ -408,9 +408,6 @@ task PrintAbsyn::visitRegWr(RegWr  p);
 
   render("(");
 
-  _i_ = 0; p.bar_.accept(this);
-  render(",");
-
   _i_ = 0; p.expr_1.accept(this);
   render(",");
 
@@ -466,9 +463,6 @@ task PrintAbsyn::visitRegRd(RegRd  p);
   render("regrd");
 
   render("(");
-
-  _i_ = 0; p.bar_.accept(this);
-  render(",");
 
   _i_ = 0; p.expr_.accept(this);
   render(")");
@@ -583,19 +577,6 @@ task PrintAbsyn::visitIsDefd(IsDefd  p);
 
   render(")");
 
-
-  if (oldi > 0) render(`_R_PAREN);
-  _i_ = oldi;
-endtask
-
-task PrintAbsyn::visitBar(Bar p); endtask //abstract class
-
-task PrintAbsyn::visitBar_(Bar_  p);
-
-  int oldi = _i_;
-  if (oldi > 0) render(`_L_PAREN);
-
-  _i_ = 0; p.expr_.accept(this);
 
   if (oldi > 0) render(`_R_PAREN);
   _i_ = oldi;
@@ -1861,13 +1842,6 @@ task ShowAbsyn::visitRegWr(RegWr  p);
   bufAppend("(");
   bufAppend("RegWr");
   bufAppend("\"");
-  bufAppend("[");
-
-  if (p.bar_)  p.bar_.accept(this);
-
-  bufAppend("]");
-
-  bufAppend(" ");
   p.expr_1.accept(this);
 
   bufAppend(" ");
@@ -1911,13 +1885,6 @@ task ShowAbsyn::visitRegRd(RegRd  p);
   bufAppend("(");
   bufAppend("RegRd");
   bufAppend("\"");
-  bufAppend("[");
-
-  if (p.bar_)  p.bar_.accept(this);
-
-  bufAppend("]");
-
-  bufAppend(" ");
   bufAppend("[");
 
   if (p.expr_)  p.expr_.accept(this);
@@ -2012,21 +1979,6 @@ task ShowAbsyn::visitIsDefd(IsDefd  p);
   visitIdent(p.ident_);
 
   bufAppend(" ");
-  bufAppend(")");
-endtask
-task ShowAbsyn::visitBar(Bar p); endtask //abstract class
-
-task ShowAbsyn::visitBar_(Bar_  p);
-
-  bufAppend("(");
-  bufAppend("Bar_");
-  bufAppend("\"");
-  bufAppend("[");
-
-  if (p.expr_)  p.expr_.accept(this);
-
-  bufAppend("]");
-
   bufAppend(")");
 endtask
 task ShowAbsyn::visitPrint_Arg(Print_Arg p); endtask //abstract class

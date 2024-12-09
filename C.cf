@@ -32,19 +32,17 @@ Call. FuncOrProcCall ::= Ident "(" [Expr] ")";
 -- Built In
 
 Print.         Builtin_Task ::= "print" "(" [Print_Arg] ")";
-RegWr.         Builtin_Task ::= "regwr" "(" Bar "," Expr  "," Expr ")";
+RegWr.         Builtin_Task ::= "regwr" "(" Expr  "," Expr ")";
 Wait.          Builtin_Task ::= "wait" "(" Expr ")";
 Fatal.         Builtin_Task ::= "fatal" "(" Expr ")";
 
-RegRd.         Builtin_Fn ::= "regrd" "(" Bar "," Expr  ")";
+RegRd.         Builtin_Fn ::= "regrd" "(" Expr  ")";
 WaitInterrupt. Builtin_Fn ::= "intr_wait" "(" "(" [Expr] ")" "," Expr ")";
 Ceil.          Builtin_Fn ::= "ceil" "(" Expr ")";
 Floor.         Builtin_Fn ::= "floor" "(" Expr ")";
 Log2.          Builtin_Fn ::= "log2" "(" Expr ")";
 Sys.           Builtin_Fn ::= "sys" "(" String_Literal ")";
 IsDefd.        Builtin_Fn ::= "defined" "(" Ident ")";
-
-Bar_. Bar ::= Expr;
 
 PrExpr.   Print_Arg ::= Expr;
 PrString. Print_Arg ::= String_Literal;

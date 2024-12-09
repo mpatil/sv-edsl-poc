@@ -35,7 +35,6 @@ static Program  YY_RESULT_Program_ = null;
   FuncOrProcCall  funcorproccall_;
   Builtin_Task  builtin_task_;
   Builtin_Fn  builtin_fn_;
-  Bar  bar_;
   Print_Arg  print_arg_;
   ListPrint_Arg  listprint_arg_;
   Proc_Definition  proc_definition_;
@@ -154,7 +153,6 @@ endtask
 %type <funcorproccall_> FuncOrProcCall
 %type <builtin_task_> Builtin_Task
 %type <builtin_fn_> Builtin_Fn
-%type <bar_> Bar
 %type <print_arg_> Print_Arg
 %type <listprint_arg_> ListPrint_Arg
 %type <proc_definition_> Proc_Definition
@@ -233,19 +231,17 @@ Jump_Stmt : _KW_break {  $$ = Break::new (); $$.line_number = yy_mylinenumber; }
 FuncOrProcCall : _IDENT_ _LPAREN ListExpr _RPAREN {  $3.v.reverse ;$$ = Call::new ($1, $3); $$.line_number = yy_mylinenumber; }
 ;
 Builtin_Task : _KW_print _LPAREN ListPrint_Arg _RPAREN {  $3.v.reverse ;$$ = Print::new ($3); $$.line_number = yy_mylinenumber; }
-  | _KW_regwr _LPAREN Bar _COMMA Expr _COMMA Expr _RPAREN {  $$ = RegWr::new ($3, $5, $7); $$.line_number = yy_mylinenumber; }
+  | _KW_regwr _LPAREN Expr _COMMA Expr _RPAREN {  $$ = RegWr::new ($3, $5); $$.line_number = yy_mylinenumber; }
   | _KW_wait _LPAREN Expr _RPAREN {  $$ = Wait::new ($3); $$.line_number = yy_mylinenumber; }
   | _KW_fatal _LPAREN Expr _RPAREN {  $$ = Fatal::new ($3); $$.line_number = yy_mylinenumber; }
 ;
-Builtin_Fn : _KW_regrd _LPAREN Bar _COMMA Expr _RPAREN {  $$ = RegRd::new ($3, $5); $$.line_number = yy_mylinenumber; }
+Builtin_Fn : _KW_regrd _LPAREN Expr _RPAREN {  $$ = RegRd::new ($3); $$.line_number = yy_mylinenumber; }
   | _KW_48 _LPAREN _LPAREN ListExpr _RPAREN _COMMA Expr _RPAREN {  $4.v.reverse ;$$ = WaitInterrupt::new ($4, $7); $$.line_number = yy_mylinenumber; }
   | _KW_ceil _LPAREN Expr _RPAREN {  $$ = Ceil::new ($3); $$.line_number = yy_mylinenumber; }
   | _KW_floor _LPAREN Expr _RPAREN {  $$ = Floor::new ($3); $$.line_number = yy_mylinenumber; }
   | _KW_log2 _LPAREN Expr _RPAREN {  $$ = Log2::new ($3); $$.line_number = yy_mylinenumber; }
   | _KW_sys _LPAREN String_Literal _RPAREN {  $$ = Sys::new ($3); $$.line_number = yy_mylinenumber; }
   | _KW_defined _LPAREN _IDENT_ _RPAREN {  $$ = IsDefd::new ($3); $$.line_number = yy_mylinenumber; }
-;
-Bar : Expr {  $$ = Bar_::new ($1); $$.line_number = yy_mylinenumber; }
 ;
 Print_Arg : Expr {  $$ = PrExpr::new ($1); $$.line_number = yy_mylinenumber; }
   | String_Literal {  $$ = PrString::new ($1); $$.line_number = yy_mylinenumber; }

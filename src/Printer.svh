@@ -67,8 +67,6 @@ class PrintAbsyn implements Visitor;
   extern virtual task visitLog2(Log2 p);
   extern virtual task visitSys(Sys p);
   extern virtual task visitIsDefd(IsDefd p);
-  extern virtual task visitBar(Bar p); /* abstract class */
-  extern virtual task visitBar_(Bar_ p);
   extern virtual task visitPrint_Arg(Print_Arg p); /* abstract class */
   extern virtual task visitPrExpr(PrExpr p);
   extern virtual task visitPrString(PrString p);
@@ -235,8 +233,6 @@ class ShowAbsyn implements Visitor;
   extern virtual task visitLog2(Log2 p);
   extern virtual task visitSys(Sys p);
   extern virtual task visitIsDefd(IsDefd p);
-  extern virtual task visitBar(Bar p); /* abstract class */
-  extern virtual task visitBar_(Bar_ p);
   extern virtual task visitPrint_Arg(Print_Arg p); /* abstract class */
   extern virtual task visitPrExpr(PrExpr p);
   extern virtual task visitPrString(PrString p);

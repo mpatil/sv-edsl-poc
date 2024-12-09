@@ -30,7 +30,6 @@ typedef class Jump_Stmt;
 typedef class FuncOrProcCall;
 typedef class Builtin_Task;
 typedef class Builtin_Fn;
-typedef class Bar;
 typedef class Print_Arg;
 typedef class Proc_Definition;
 typedef class Func_Definition;
@@ -81,7 +80,6 @@ typedef class Floor;
 typedef class Log2;
 typedef class Sys;
 typedef class IsDefd;
-typedef class Bar_;
 typedef class PrExpr;
 typedef class PrString;
 typedef class PrHex;
@@ -161,7 +159,6 @@ interface class Visitor;
   pure virtual task visitFuncOrProcCall(FuncOrProcCall p);
   pure virtual task visitBuiltin_Task(Builtin_Task p);
   pure virtual task visitBuiltin_Fn(Builtin_Fn p);
-  pure virtual task visitBar(Bar p);
   pure virtual task visitPrint_Arg(Print_Arg p);
   pure virtual task visitProc_Definition(Proc_Definition p);
   pure virtual task visitFunc_Definition(Func_Definition p);
@@ -212,7 +209,6 @@ interface class Visitor;
   pure virtual task visitLog2(Log2 p);
   pure virtual task visitSys(Sys p);
   pure virtual task visitIsDefd(IsDefd p);
-  pure virtual task visitBar_(Bar_ p);
   pure virtual task visitPrExpr(PrExpr p);
   pure virtual task visitPrString(PrString p);
   pure virtual task visitPrHex(PrHex p);
@@ -335,11 +331,6 @@ virtual class Builtin_Task implements Visitable;
 endclass
 
 virtual class Builtin_Fn implements Visitable;
-  int line_number;
-  virtual task accept(Visitor v); endtask
-endclass
-
-virtual class Bar implements Visitable;
   int line_number;
   virtual task accept(Visitor v); endtask
 endclass
@@ -586,11 +577,10 @@ class Print extends Builtin_Task;
 endclass
 
 class RegWr extends Builtin_Task;
-  Bar bar_;
   Expr expr_1;
   Expr expr_2;
 
-  extern function new(Bar p1, Expr p2, Expr p3);
+  extern function new(Expr p1, Expr p2);
   extern virtual task accept(Visitor v);
 endclass
 
@@ -609,10 +599,9 @@ class Fatal extends Builtin_Task;
 endclass
 
 class RegRd extends Builtin_Fn;
-  Bar bar_;
   Expr expr_;
 
-  extern function new(Bar p1, Expr p2);
+  extern function new(Expr p1);
   extern virtual task accept(Visitor v);
 endclass
 
@@ -656,13 +645,6 @@ class IsDefd extends Builtin_Fn;
   Ident ident_;
 
   extern function new(Ident p1);
-  extern virtual task accept(Visitor v);
-endclass
-
-class Bar_ extends Bar;
-  Expr expr_;
-
-  extern function new(Expr p1);
   extern virtual task accept(Visitor v);
 endclass
 
