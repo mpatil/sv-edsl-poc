@@ -305,147 +305,147 @@ endclass
 /********************   Abstract Syntax Classes    ********************/
 
 virtual class Program implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Stmt_Item implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Var_Assignment implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Jump_Stmt implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class FuncOrProcCall implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Builtin_Task implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Builtin_Fn implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Bar implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Print_Arg implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Proc_Definition implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Func_Definition implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Definition implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Formal_Arg implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Else_If implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Else_Opt implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Conditional_Stmt implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Loop_Stmt implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class For_Init_Opt implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Expr_Opt implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class For_Step_Opt implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Op implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Expr implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Primary implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Range_Expr_Opt implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Range_Expr implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Unary_Operator implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Inc_Or_Dec_Operator implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class Number implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 
 virtual class String_Literal implements Visitable;
-
+  int line_number;
   virtual task accept(Visitor v); endtask
 endclass
 

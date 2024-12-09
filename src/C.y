@@ -202,185 +202,185 @@ endtask
 %}
 
 %%
-Program : ListStmt_Item {  $$ = Program1::new ($1);YY_RESULT_Program_ = $$; }
+Program : ListStmt_Item {  $$ = Program1::new ($1); $$.line_number = yy_mylinenumber;YY_RESULT_Program_ = $$; }
 ;
 ListStmt_Item : /* empty */ {  $$ = ListStmt_Item::new(); }
   | ListStmt_Item Stmt_Item {  $1.v.push_back($2); $$ = $1; }
 ;
-Stmt_Item : _KW_var _IDENT_ _SEMI {  $$ = VarDeclStmt::new ($2); }
-  | _KW_var Var_Assignment _SEMI {  $$ = VarAssDeclStmt::new ($2); }
-  | Var_Assignment _SEMI {  $$ = AssignmentStmt::new ($1); }
-  | Conditional_Stmt {  $$ = ConditionalStmt::new ($1); }
-  | _IDENT_ Inc_Or_Dec_Operator _SEMI {  $$ = IncDecOpStmt::new ($1, $2); }
-  | Loop_Stmt {  $$ = LoopStmt::new ($1); }
-  | Jump_Stmt _SEMI {  $$ = JumpStmt::new ($1); }
-  | _LBRACE ListStmt_Item _RBRACE {  $$ = BlockStmt::new ($2); }
-  | Builtin_Task _SEMI {  $$ = BuiltInStmt::new ($1); }
-  | Proc_Definition {  $$ = ProcDefStmt::new ($1); }
-  | Func_Definition {  $$ = FuncDefStmt::new ($1); }
-  | FuncOrProcCall _SEMI {  $$ = ProcCallStmt::new ($1); }
+Stmt_Item : _KW_var _IDENT_ _SEMI {  $$ = VarDeclStmt::new ($2); $$.line_number = yy_mylinenumber; }
+  | _KW_var Var_Assignment _SEMI {  $$ = VarAssDeclStmt::new ($2); $$.line_number = yy_mylinenumber; }
+  | Var_Assignment _SEMI {  $$ = AssignmentStmt::new ($1); $$.line_number = yy_mylinenumber; }
+  | Conditional_Stmt {  $$ = ConditionalStmt::new ($1); $$.line_number = yy_mylinenumber; }
+  | _IDENT_ Inc_Or_Dec_Operator _SEMI {  $$ = IncDecOpStmt::new ($1, $2); $$.line_number = yy_mylinenumber; }
+  | Loop_Stmt {  $$ = LoopStmt::new ($1); $$.line_number = yy_mylinenumber; }
+  | Jump_Stmt _SEMI {  $$ = JumpStmt::new ($1); $$.line_number = yy_mylinenumber; }
+  | _LBRACE ListStmt_Item _RBRACE {  $$ = BlockStmt::new ($2); $$.line_number = yy_mylinenumber; }
+  | Builtin_Task _SEMI {  $$ = BuiltInStmt::new ($1); $$.line_number = yy_mylinenumber; }
+  | Proc_Definition {  $$ = ProcDefStmt::new ($1); $$.line_number = yy_mylinenumber; }
+  | Func_Definition {  $$ = FuncDefStmt::new ($1); $$.line_number = yy_mylinenumber; }
+  | FuncOrProcCall _SEMI {  $$ = ProcCallStmt::new ($1); $$.line_number = yy_mylinenumber; }
 ;
 ListExpr : /* empty */ {  $$ = ListExpr::new(); }
   | Expr {  $$ = ListExpr::new(); $$.v.push_back($1); }
   | Expr _COMMA ListExpr {  $3.v.push_back($1); $$ = $3; }
 ;
-Var_Assignment : _IDENT_ Range_Expr_Opt _EQ Expr {  $$ = Assignment::new ($1, $2, $4); }
+Var_Assignment : _IDENT_ Range_Expr_Opt _EQ Expr {  $$ = Assignment::new ($1, $2, $4); $$.line_number = yy_mylinenumber; }
 ;
-Jump_Stmt : _KW_break {  $$ = Break::new (); }
-  | _KW_continue {  $$ = Continue::new (); }
-  | _KW_return Expr_Opt {  $$ = Return::new ($2); }
+Jump_Stmt : _KW_break {  $$ = Break::new (); $$.line_number = yy_mylinenumber; }
+  | _KW_continue {  $$ = Continue::new (); $$.line_number = yy_mylinenumber; }
+  | _KW_return Expr_Opt {  $$ = Return::new ($2); $$.line_number = yy_mylinenumber; }
 ;
-FuncOrProcCall : _IDENT_ _LPAREN ListExpr _RPAREN {  $3.v.reverse ;$$ = Call::new ($1, $3); }
+FuncOrProcCall : _IDENT_ _LPAREN ListExpr _RPAREN {  $3.v.reverse ;$$ = Call::new ($1, $3); $$.line_number = yy_mylinenumber; }
 ;
-Builtin_Task : _KW_print _LPAREN ListPrint_Arg _RPAREN {  $3.v.reverse ;$$ = Print::new ($3); }
-  | _KW_regwr _LPAREN Bar _COMMA Expr _COMMA Expr _RPAREN {  $$ = RegWr::new ($3, $5, $7); }
-  | _KW_wait _LPAREN Expr _RPAREN {  $$ = Wait::new ($3); }
-  | _KW_fatal _LPAREN Expr _RPAREN {  $$ = Fatal::new ($3); }
+Builtin_Task : _KW_print _LPAREN ListPrint_Arg _RPAREN {  $3.v.reverse ;$$ = Print::new ($3); $$.line_number = yy_mylinenumber; }
+  | _KW_regwr _LPAREN Bar _COMMA Expr _COMMA Expr _RPAREN {  $$ = RegWr::new ($3, $5, $7); $$.line_number = yy_mylinenumber; }
+  | _KW_wait _LPAREN Expr _RPAREN {  $$ = Wait::new ($3); $$.line_number = yy_mylinenumber; }
+  | _KW_fatal _LPAREN Expr _RPAREN {  $$ = Fatal::new ($3); $$.line_number = yy_mylinenumber; }
 ;
-Builtin_Fn : _KW_regrd _LPAREN Bar _COMMA Expr _RPAREN {  $$ = RegRd::new ($3, $5); }
-  | _KW_48 _LPAREN _LPAREN ListExpr _RPAREN _COMMA Expr _RPAREN {  $4.v.reverse ;$$ = WaitInterrupt::new ($4, $7); }
-  | _KW_ceil _LPAREN Expr _RPAREN {  $$ = Ceil::new ($3); }
-  | _KW_floor _LPAREN Expr _RPAREN {  $$ = Floor::new ($3); }
-  | _KW_log2 _LPAREN Expr _RPAREN {  $$ = Log2::new ($3); }
-  | _KW_sys _LPAREN String_Literal _RPAREN {  $$ = Sys::new ($3); }
-  | _KW_defined _LPAREN _IDENT_ _RPAREN {  $$ = IsDefd::new ($3); }
+Builtin_Fn : _KW_regrd _LPAREN Bar _COMMA Expr _RPAREN {  $$ = RegRd::new ($3, $5); $$.line_number = yy_mylinenumber; }
+  | _KW_48 _LPAREN _LPAREN ListExpr _RPAREN _COMMA Expr _RPAREN {  $4.v.reverse ;$$ = WaitInterrupt::new ($4, $7); $$.line_number = yy_mylinenumber; }
+  | _KW_ceil _LPAREN Expr _RPAREN {  $$ = Ceil::new ($3); $$.line_number = yy_mylinenumber; }
+  | _KW_floor _LPAREN Expr _RPAREN {  $$ = Floor::new ($3); $$.line_number = yy_mylinenumber; }
+  | _KW_log2 _LPAREN Expr _RPAREN {  $$ = Log2::new ($3); $$.line_number = yy_mylinenumber; }
+  | _KW_sys _LPAREN String_Literal _RPAREN {  $$ = Sys::new ($3); $$.line_number = yy_mylinenumber; }
+  | _KW_defined _LPAREN _IDENT_ _RPAREN {  $$ = IsDefd::new ($3); $$.line_number = yy_mylinenumber; }
 ;
-Bar : Expr {  $$ = Bar_::new ($1); }
+Bar : Expr {  $$ = Bar_::new ($1); $$.line_number = yy_mylinenumber; }
 ;
-Print_Arg : Expr {  $$ = PrExpr::new ($1); }
-  | String_Literal {  $$ = PrString::new ($1); }
-  | _KW_hex _LPAREN Expr _RPAREN {  $$ = PrHex::new ($3); }
-  | _KW_bin _LPAREN Expr _RPAREN {  $$ = PrBin::new ($3); }
+Print_Arg : Expr {  $$ = PrExpr::new ($1); $$.line_number = yy_mylinenumber; }
+  | String_Literal {  $$ = PrString::new ($1); $$.line_number = yy_mylinenumber; }
+  | _KW_hex _LPAREN Expr _RPAREN {  $$ = PrHex::new ($3); $$.line_number = yy_mylinenumber; }
+  | _KW_bin _LPAREN Expr _RPAREN {  $$ = PrBin::new ($3); $$.line_number = yy_mylinenumber; }
 ;
 ListPrint_Arg : Print_Arg {  $$ = ListPrint_Arg::new(); $$.v.push_back($1); }
   | Print_Arg _COMMA ListPrint_Arg {  $3.v.push_back($1); $$ = $3; }
 ;
-Proc_Definition : _KW_procedure Definition {  $$ = ProcDef::new ($2); }
+Proc_Definition : _KW_procedure Definition {  $$ = ProcDef::new ($2); $$.line_number = yy_mylinenumber; }
 ;
-Func_Definition : _KW_function Definition {  $$ = FuncDef::new ($2); }
+Func_Definition : _KW_function Definition {  $$ = FuncDef::new ($2); $$.line_number = yy_mylinenumber; }
 ;
-Definition : _IDENT_ _LPAREN ListFormal_Arg _RPAREN Stmt_Item {  $3.v.reverse ;$$ = Defn::new ($1, $3, $5); }
+Definition : _IDENT_ _LPAREN ListFormal_Arg _RPAREN Stmt_Item {  $3.v.reverse ;$$ = Defn::new ($1, $3, $5); $$.line_number = yy_mylinenumber; }
 ;
-Formal_Arg : _IDENT_ {  $$ = Formal::new ($1); }
+Formal_Arg : _IDENT_ {  $$ = Formal::new ($1); $$.line_number = yy_mylinenumber; }
 ;
 ListFormal_Arg : /* empty */ {  $$ = ListFormal_Arg::new(); }
   | Formal_Arg {  $$ = ListFormal_Arg::new(); $$.v.push_back($1); }
   | Formal_Arg _COMMA ListFormal_Arg {  $3.v.push_back($1); $$ = $3; }
 ;
-Else_If : _KW_elsif _LPAREN Expr _RPAREN Stmt_Item {  $$ = ElsIf::new ($3, $5); }
+Else_If : _KW_elsif _LPAREN Expr _RPAREN Stmt_Item {  $$ = ElsIf::new ($3, $5); $$.line_number = yy_mylinenumber; }
 ;
 ListElse_If : /* empty */ {  $$ = ListElse_If::new(); }
   | ListElse_If Else_If {  $1.v.push_back($2); $$ = $1; }
 ;
-Else_Opt : /* empty */ {  $$ = ElseIsEmpty::new (); }
-  | _KW_else Stmt_Item {  $$ = ElseIsElse::new ($2); }
+Else_Opt : /* empty */ {  $$ = ElseIsEmpty::new (); $$.line_number = yy_mylinenumber; }
+  | _KW_else Stmt_Item {  $$ = ElseIsElse::new ($2); $$.line_number = yy_mylinenumber; }
 ;
-Conditional_Stmt : _KW_if _LPAREN Expr _RPAREN Stmt_Item ListElse_If Else_Opt {  $$ = If::new ($3, $5, $6, $7); }
+Conditional_Stmt : _KW_if _LPAREN Expr _RPAREN Stmt_Item ListElse_If Else_Opt {  $$ = If::new ($3, $5, $6, $7); $$.line_number = yy_mylinenumber; }
 ;
-Loop_Stmt : _KW_while _LPAREN Expr _RPAREN Stmt_Item {  $$ = While::new ($3, $5); }
-  | _KW_for _LPAREN For_Init_Opt _SEMI Expr_Opt _SEMI For_Step_Opt _RPAREN Stmt_Item {  $$ = For::new ($3, $5, $7, $9); }
+Loop_Stmt : _KW_while _LPAREN Expr _RPAREN Stmt_Item {  $$ = While::new ($3, $5); $$.line_number = yy_mylinenumber; }
+  | _KW_for _LPAREN For_Init_Opt _SEMI Expr_Opt _SEMI For_Step_Opt _RPAREN Stmt_Item {  $$ = For::new ($3, $5, $7, $9); $$.line_number = yy_mylinenumber; }
   | _KW_forever Stmt_Item {  $$ = forever__($2); }
 ;
-For_Init_Opt : /* empty */ {  $$ = ForInitIsEmpty::new (); }
-  | Var_Assignment {  $$ = ForInitIsInit::new ($1); }
-  | _KW_var Var_Assignment {  $$ = ForInitIsVarInit::new ($2); }
+For_Init_Opt : /* empty */ {  $$ = ForInitIsEmpty::new (); $$.line_number = yy_mylinenumber; }
+  | Var_Assignment {  $$ = ForInitIsInit::new ($1); $$.line_number = yy_mylinenumber; }
+  | _KW_var Var_Assignment {  $$ = ForInitIsVarInit::new ($2); $$.line_number = yy_mylinenumber; }
 ;
-Expr_Opt : /* empty */ {  $$ = ExprIsEmpty::new (); }
-  | Expr {  $$ = ExprIsExpr::new ($1); }
+Expr_Opt : /* empty */ {  $$ = ExprIsEmpty::new (); $$.line_number = yy_mylinenumber; }
+  | Expr {  $$ = ExprIsExpr::new ($1); $$.line_number = yy_mylinenumber; }
 ;
-For_Step_Opt : /* empty */ {  $$ = ForStepIsEmpty::new (); }
-  | Var_Assignment {  $$ = ForStepIsAssignment::new ($1); }
-  | _IDENT_ Inc_Or_Dec_Operator {  $$ = ForStepIsIncOrDec::new ($1, $2); }
+For_Step_Opt : /* empty */ {  $$ = ForStepIsEmpty::new (); $$.line_number = yy_mylinenumber; }
+  | Var_Assignment {  $$ = ForStepIsAssignment::new ($1); $$.line_number = yy_mylinenumber; }
+  | _IDENT_ Inc_Or_Dec_Operator {  $$ = ForStepIsIncOrDec::new ($1, $2); $$.line_number = yy_mylinenumber; }
 ;
-Op : Op1 {  $$ = $1; }
-  | Op2 {  $$ = $1; }
-  | Op3 {  $$ = $1; }
-  | Op4 {  $$ = $1; }
-  | Op5 {  $$ = $1; }
-  | Op6 {  $$ = $1; }
-  | Op7 {  $$ = $1; }
+Op : Op1 {  $$ = $1; $$.line_number = yy_mylinenumber; }
+  | Op2 {  $$ = $1; $$.line_number = yy_mylinenumber; }
+  | Op3 {  $$ = $1; $$.line_number = yy_mylinenumber; }
+  | Op4 {  $$ = $1; $$.line_number = yy_mylinenumber; }
+  | Op5 {  $$ = $1; $$.line_number = yy_mylinenumber; }
+  | Op6 {  $$ = $1; $$.line_number = yy_mylinenumber; }
+  | Op7 {  $$ = $1; $$.line_number = yy_mylinenumber; }
 ;
-Op7 : _DSTAR {  $$ = Pow::new (); }
+Op7 : _DSTAR {  $$ = Pow::new (); $$.line_number = yy_mylinenumber; }
 ;
-Op6 : _STAR {  $$ = Mul::new (); }
-  | _SLASH {  $$ = Div::new (); }
-  | _PERCENT {  $$ = Mod::new (); }
+Op6 : _STAR {  $$ = Mul::new (); $$.line_number = yy_mylinenumber; }
+  | _SLASH {  $$ = Div::new (); $$.line_number = yy_mylinenumber; }
+  | _PERCENT {  $$ = Mod::new (); $$.line_number = yy_mylinenumber; }
 ;
-Op5 : _PLUS {  $$ = Add::new (); }
-  | _MINUS {  $$ = Sub::new (); }
+Op5 : _PLUS {  $$ = Add::new (); $$.line_number = yy_mylinenumber; }
+  | _MINUS {  $$ = Sub::new (); $$.line_number = yy_mylinenumber; }
 ;
-Op4 : _AMP {  $$ = LAnd::new (); }
-  | _CARET {  $$ = Xor::new (); }
-  | _BAR {  $$ = LOr::new (); }
+Op4 : _AMP {  $$ = LAnd::new (); $$.line_number = yy_mylinenumber; }
+  | _CARET {  $$ = Xor::new (); $$.line_number = yy_mylinenumber; }
+  | _BAR {  $$ = LOr::new (); $$.line_number = yy_mylinenumber; }
 ;
-Op3 : _DGT {  $$ = Rsh::new (); }
-  | _DLT {  $$ = Lsh::new (); }
+Op3 : _DGT {  $$ = Rsh::new (); $$.line_number = yy_mylinenumber; }
+  | _DLT {  $$ = Lsh::new (); $$.line_number = yy_mylinenumber; }
 ;
-Op2 : _LT {  $$ = Lt::new (); }
-  | _LDARROW {  $$ = Leq::new (); }
-  | _GT {  $$ = Gt::new (); }
-  | _GTEQ {  $$ = Geq::new (); }
-  | _DEQ {  $$ = Eq::new (); }
-  | _BANGEQ {  $$ = Neq::new (); }
+Op2 : _LT {  $$ = Lt::new (); $$.line_number = yy_mylinenumber; }
+  | _LDARROW {  $$ = Leq::new (); $$.line_number = yy_mylinenumber; }
+  | _GT {  $$ = Gt::new (); $$.line_number = yy_mylinenumber; }
+  | _GTEQ {  $$ = Geq::new (); $$.line_number = yy_mylinenumber; }
+  | _DEQ {  $$ = Eq::new (); $$.line_number = yy_mylinenumber; }
+  | _BANGEQ {  $$ = Neq::new (); $$.line_number = yy_mylinenumber; }
 ;
-Op1 : _DAMP {  $$ = And::new (); }
-  | _DBAR {  $$ = Or::new (); }
+Op1 : _DAMP {  $$ = And::new (); $$.line_number = yy_mylinenumber; }
+  | _DBAR {  $$ = Or::new (); $$.line_number = yy_mylinenumber; }
 ;
-Expr9 : Primary {  $$ = ExprPrim::new ($1); }
-  | _LPAREN Expr _RPAREN {  $$ = $2; }
+Expr9 : Primary {  $$ = ExprPrim::new ($1); $$.line_number = yy_mylinenumber; }
+  | _LPAREN Expr _RPAREN {  $$ = $2; $$.line_number = yy_mylinenumber; }
 ;
-Expr8 : Unary_Operator Expr9 {  $$ = ExprUnary::new ($1, $2); }
-  | Builtin_Fn {  $$ = ExprBltin::new ($1); }
-  | FuncOrProcCall {  $$ = ExprFuncCall::new ($1); }
-  | Expr9 {  $$ = $1; }
+Expr8 : Unary_Operator Expr9 {  $$ = ExprUnary::new ($1, $2); $$.line_number = yy_mylinenumber; }
+  | Builtin_Fn {  $$ = ExprBltin::new ($1); $$.line_number = yy_mylinenumber; }
+  | FuncOrProcCall {  $$ = ExprFuncCall::new ($1); $$.line_number = yy_mylinenumber; }
+  | Expr9 {  $$ = $1; $$.line_number = yy_mylinenumber; }
 ;
 Expr7 : Expr8 Op7 Expr7 {  $$ = op_($1, $2, $3); }
-  | Expr8 {  $$ = $1; }
+  | Expr8 {  $$ = $1; $$.line_number = yy_mylinenumber; }
 ;
 Expr6 : Expr6 Op6 Expr7 {  $$ = op_($1, $2, $3); }
-  | Expr7 {  $$ = $1; }
+  | Expr7 {  $$ = $1; $$.line_number = yy_mylinenumber; }
 ;
 Expr5 : Expr5 Op5 Expr6 {  $$ = op_($1, $2, $3); }
-  | Expr6 {  $$ = $1; }
+  | Expr6 {  $$ = $1; $$.line_number = yy_mylinenumber; }
 ;
 Expr4 : Expr4 Op4 Expr5 {  $$ = op_($1, $2, $3); }
-  | Expr5 {  $$ = $1; }
+  | Expr5 {  $$ = $1; $$.line_number = yy_mylinenumber; }
 ;
 Expr3 : Expr3 Op3 Expr4 {  $$ = op_($1, $2, $3); }
-  | Expr4 {  $$ = $1; }
+  | Expr4 {  $$ = $1; $$.line_number = yy_mylinenumber; }
 ;
 Expr2 : Expr3 Op2 Expr3 {  $$ = op_($1, $2, $3); }
-  | Expr3 {  $$ = $1; }
+  | Expr3 {  $$ = $1; $$.line_number = yy_mylinenumber; }
 ;
 Expr1 : Expr1 Op1 Expr2 {  $$ = op_($1, $2, $3); }
-  | Expr2 {  $$ = $1; }
+  | Expr2 {  $$ = $1; $$.line_number = yy_mylinenumber; }
 ;
-Expr : Expr _QUESTION Expr1 _COLON Expr1 {  $$ = ExprTernary::new ($1, $3, $5); }
-  | Expr1 {  $$ = $1; }
+Expr : Expr _QUESTION Expr1 _COLON Expr1 {  $$ = ExprTernary::new ($1, $3, $5); $$.line_number = yy_mylinenumber; }
+  | Expr1 {  $$ = $1; $$.line_number = yy_mylinenumber; }
 ;
-Primary : _IDENT_ Range_Expr_Opt {  $$ = PrimIdent::new ($1, $2); }
-  | Number {  $$ = PrimNumber::new ($1); }
+Primary : _IDENT_ Range_Expr_Opt {  $$ = PrimIdent::new ($1, $2); $$.line_number = yy_mylinenumber; }
+  | Number {  $$ = PrimNumber::new ($1); $$.line_number = yy_mylinenumber; }
 ;
-Range_Expr_Opt : /* empty */ {  $$ = RangeExprIsEmpty::new (); }
-  | _LBRACK Range_Expr _RBRACK {  $$ = RangeExprIsRange::new ($2); }
+Range_Expr_Opt : /* empty */ {  $$ = RangeExprIsEmpty::new (); $$.line_number = yy_mylinenumber; }
+  | _LBRACK Range_Expr _RBRACK {  $$ = RangeExprIsRange::new ($2); $$.line_number = yy_mylinenumber; }
 ;
-Range_Expr : Expr {  $$ = RangeExprBit::new ($1); }
-  | Expr _COLON Expr {  $$ = RangeExprRange::new ($1, $3); }
+Range_Expr : Expr {  $$ = RangeExprBit::new ($1); $$.line_number = yy_mylinenumber; }
+  | Expr _COLON Expr {  $$ = RangeExprRange::new ($1, $3); $$.line_number = yy_mylinenumber; }
 ;
-Unary_Operator : _PLUS {  $$ = UnaryPlus::new (); }
-  | _MINUS {  $$ = UnaryMinus::new (); }
-  | _BANG {  $$ = UnaryNot::new (); }
-  | _TILDE {  $$ = UnaryComp::new (); }
+Unary_Operator : _PLUS {  $$ = UnaryPlus::new (); $$.line_number = yy_mylinenumber; }
+  | _MINUS {  $$ = UnaryMinus::new (); $$.line_number = yy_mylinenumber; }
+  | _BANG {  $$ = UnaryNot::new (); $$.line_number = yy_mylinenumber; }
+  | _TILDE {  $$ = UnaryComp::new (); $$.line_number = yy_mylinenumber; }
 ;
-Inc_Or_Dec_Operator : _DPLUS {  $$ = Incr::new (); }
-  | _DMINUS {  $$ = Decr::new (); }
+Inc_Or_Dec_Operator : _DPLUS {  $$ = Incr::new (); $$.line_number = yy_mylinenumber; }
+  | _DMINUS {  $$ = Decr::new (); $$.line_number = yy_mylinenumber; }
 ;
-Number : T_Decimal_Number {  $$ = Decimal::new ($1); }
-  | T_BinaryNumber {  $$ = Binary::new ($1); }
-  | T_HexNumber {  $$ = Hex::new ($1); }
-  | T_Real_Number {  $$ = Real::new ($1); }
+Number : T_Decimal_Number {  $$ = Decimal::new ($1); $$.line_number = yy_mylinenumber; }
+  | T_BinaryNumber {  $$ = Binary::new ($1); $$.line_number = yy_mylinenumber; }
+  | T_HexNumber {  $$ = Hex::new ($1); $$.line_number = yy_mylinenumber; }
+  | T_Real_Number {  $$ = Real::new ($1); $$.line_number = yy_mylinenumber; }
 ;
-String_Literal : T_AnyChars {  $$ = StringLit::new ($1); }
+String_Literal : T_AnyChars {  $$ = StringLit::new ($1); $$.line_number = yy_mylinenumber; }
 ;
 
 %%

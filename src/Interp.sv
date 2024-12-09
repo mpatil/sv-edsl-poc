@@ -49,7 +49,7 @@ task Interp::visitVarDeclStmt(VarDeclStmt p);
   if(s == null)
     s = install(p.ident_, UNDEF);
   else
-    $write("\nWARNING: variable %s already declared: re-declared at line!!\n", s.name[0]);
+    $write("\nWARNING: variable %s already declared: re-declared at line %0d!!\n", s.name[0], p.line_number);
 
   //visitIdent(p.ident_);
 endtask
@@ -119,7 +119,7 @@ task Interp::visitAssignment(Assignment p);
 
     s_ = lookup(p.ident_, CURRENT);
     if (s_)
-      $write("\nWARNING: variable %s already declared: re-declared at line!!\n", s_.name);
+      $write("\nWARNING: variable %s already declared: re-declared at line %0d!!\n", s_.name, p.line_number);
     else
       s_ = install(p.ident_, UNDEF);
     var_install = 0;
@@ -141,22 +141,22 @@ task Interp::visitAssignment(Assignment p);
   end
 
   if ( r2.ival > 63 || r2.ival < 0 ) begin
-    $fatal("\nERROR: bad bit select range value for variable %s: %0d at line !!\n", s.name, uint'(r2.ival));
+    $fatal("\nERROR: bad bit select range value for variable %s: %0d at line %0d!!\n", s.name, uint'(r2.ival), p.line_number);
   end
 
   if ( r1.ival > 63 || r1.ival < 0 ) begin
-    $fatal("\nERROR: bad bit select range value for variable %s: %0d at line !!\n", s.name, uint'(r1.ival));
+    $fatal("\nERROR: bad bit select range value for variable %s: %0d at line %0d!!\n", s.name, uint'(r1.ival), p.line_number);
   end
 
   if ( r2.ival > r1.ival ) begin
-    $fatal("\nERROR: bad bit select range values for variable %s: %0d:%0d at line!!\n", s.name, uint'(r1.ival), uint'(r2.ival));
+    $fatal("\nERROR: bad bit select range values for variable %s: %0d:%0d at line %0d!!\n", s.name, uint'(r1.ival), uint'(r2.ival), p.line_number);
   end
 
   if ( longint'(r1.ival - r2.ival + 1) < 64 ) begin
     ulongint mask = (ulongint'(1) << ulongint'(r1.ival - r2.ival + 1)) - 1;
 
     if ( d1.ival > mask )
-      $write("\nWARNING: RHS(%0d) larger than LHS range max (%0d) in assignment to variable %s at line!!\n", ulongint'(d1.ival), ulongint'(mask), s.name);
+      $write("\nWARNING: RHS(%0d) larger than LHS range max (%0d) in assignment to variable %s at line %0d!!\n", ulongint'(d1.ival), ulongint'(mask), s.name, p.line_number);
 
     d1.ival = real'(ulongint'(d1.ival) & ulongint'(mask));
 
@@ -199,11 +199,11 @@ task Interp::visitCall(Call p);
   d1 = pop();
   s = d1.sym;
   if ( s.type_ == UNDEF || !(s.type_ == FUNC || s.type_ == PROC) )
-    $fatal("\nERROR: procedure or function \"%s\" not defined but called at line!!\n", d1.sym.name);
+    $fatal("\nERROR: procedure or function \"%s\" not defined but called at line %0d!!\n", d1.sym.name, p.line_number);
   $cast(def, s.u);
 
   if ( p.listexpr_.v.size() != def.formals.size() )
-    $fatal("\nERROR: Number of args for procedure or function \"%s\" must match number of parameters in definition. At line!!\n", d1.sym.name);
+    $fatal("\nERROR: Number of args for procedure or function \"%s\" must match number of parameters in definition. At line %0d!!\n", d1.sym.name, p.line_number);
 
   p.listexpr_.accept(this);
   for (uint i = 0; i < def.formals.size(); i++) begin
@@ -235,7 +235,7 @@ task Interp::visitCall(Call p);
   if ( return_jump ) begin
     return_jump = 0;
   end else if ( call_type_ == FUNC ) begin
-    $fatal("\nERROR: function \"%s\" must return a value. At line!!\n", d1.sym.name);
+    $fatal("\nERROR: function \"%s\" must return a value. At line %0d!!\n", d1.sym.name, p.line_number);
   end
 `ifdef DEBUG
   $write("returned. scope = %0d in_call = %0d\n", scope, in_call);
@@ -263,7 +263,7 @@ task Interp::visitRegWr(RegWr p);
   d2 = pop();
   d1 = pop();
 
-  $write("writing csr: %0d %0d %0d\n", ulongint'(d1.ival), ulongint'(d2.ival), ulongint'(d3.ival));
+  $write("writing csr: %0d %0d %0d, at line %0d\n", ulongint'(d1.ival), ulongint'(d2.ival), ulongint'(d3.ival), p.line_number);
 endtask
 
 task Interp::visitWait(Wait p);
@@ -282,7 +282,7 @@ task Interp::visitFatal(Fatal p);
 
   d = pop();
 
-  $fatal("FATAL: %d !!!!\n", uint'(d.ival));
+  $fatal("FATAL: %d at line %0d!!!!\n", uint'(d.ival), p.line_number);
   exit_fatal = uint'(d.ival);
 endtask
 
@@ -439,7 +439,7 @@ task Interp::visitDefn(Defn p);
   d1 = pop();
   s = d1.sym;
   if ( s.type_ != UNDEF )
-    $fatal("\nERROR: using a pre-defined variable \"%s\" for function or procedure name at line %%0d!!\n", d1.sym.name/*, p->line_number*/);
+    $fatal("\nERROR: using a pre-defined variable \"%s\" for function or procedure name at line %0d!!\n", d1.sym.name, p.line_number);
   s.type_ = defn_type;
 
   p.listformal_arg_.accept(this);
@@ -733,13 +733,13 @@ task Interp::visitEOp(EOp p);
     MUL: d3.ival = d1.ival * d2.ival;
     DIV: begin
            if ( d2.ival == 0.0 ) begin
-             $fatal("\nERROR: division by zero at line!!\n" /*, p.line_number*/);
+             $fatal("\nERROR: division by zero at line %0d!!\n", p.line_number);
            end
            d3.ival = d1.ival / d2.ival;
          end
     MOD: begin
            if ( longint'(d2.ival) == 0 ) begin
-             $fatal("\nERROR: mod by zero at line %0d!!\n"/*, p.line_number*/);
+             $fatal("\nERROR: mod by zero at line %0d!!\n", p.line_number);
            end
            d3.ival = real'(longint'(d1.ival) % longint'(d2.ival));
          end
@@ -758,11 +758,11 @@ task Interp::visitEOp(EOp p);
     NEQ: d3.ival = real'(d1.ival != d2.ival);
     AND: d3.ival = real'(d1.ival && d2.ival);
     OR:  d3.ival = real'(d1.ival || d2.ival);
-    default:    $fatal("\nERROR: Unhandled op at line !!\n"/*, p.line_number*/);
+    default:    $fatal("\nERROR: Unhandled op at line %0d!!\n", p.line_number);
   endcase
 
 `ifdef DEBUG
-  $write("evaluated expression %0d\n", uint'(op));
+  $write("evaluated expression %0d, at line %0d\n", uint'(op), p.line_number);
 `endif
   push(d3);
 endtask
@@ -777,26 +777,26 @@ task Interp::visitPrimIdent(PrimIdent p);
 
   d = pop();
   if ( d.sym.type_ != VAR && d.sym.type_ != UNDEF ) begin
-    $fatal("\nERROR: attempt to evaluate a non variable at line 0d!!\n"/*, p.line_number*/);
+    $fatal("\nERROR: attempt to evaluate a non variable at line 0d!!\n", p.line_number);
   end
   if ( d.sym.type_ == UNDEF ) begin
-    $fatal("\nERROR: undefined variable \"%s\" at line 0d!!\n", d.sym.name/*, p.line_number*/);
+    $fatal("\nERROR: undefined variable \"%s\" at line 0d!!\n", d.sym.name, p.line_number);
   end
 
   p.range_expr_opt_.accept(this);
 
   r2 = pop();
   if ( r2.ival > 63 || r2.ival < 0 ) begin
-    $fatal("\nERROR: bad range value: %0d at line %0d!!\n", uint'(r2.ival)/*, p.line_number*/);
+    $fatal("\nERROR: bad range value: %0d at line %0d!!\n", uint'(r2.ival), p.line_number);
   end
 
   r1 = pop();
   if ( r1.ival > 63 || r1.ival < 0 ) begin
-    $fatal("\nERROR: bad range values: %0d at line %%0d!!\n", uint'(r1.ival)/*, p.line_number*/);
+    $fatal("\nERROR: bad range values: %0d at line %0d!!\n", uint'(r1.ival), p.line_number);
   end
 
   if ( r2.ival > r1.ival ) begin
-    $fatal("\nERROR: bad range values: %0d:%0d at line %%0d!!\n", uint'(r1.ival), uint'(r2.ival)/*, p.line_number*/);
+    $fatal("\nERROR: bad range values: %0d:%0d at line %0d!!\n", uint'(r1.ival), uint'(r2.ival), p.line_number);
   end
 
   $cast(num, d.sym.u);
@@ -913,12 +913,12 @@ task Interp::visitListStmt_Item(ListStmt_Item  liststmt_item);
 
   for (uint i = 0; i < liststmt_item.v.size(); i++) begin
 `ifdef DEBUG
-    //$write("line: %0d\n", liststmt_item.v[i].line_number);
+    $write("line: %0d\n", liststmt_item.v[i].line_number);
 `endif
     liststmt_item.v[i].accept(this);
     if ( return_jump && in_call ) begin
 `ifdef DEBUG
-      $write("line: , return_jump = %0d\n", /*liststmt_item.v[i].line_number,*/ return_jump);
+      $write("line: %0d, return_jump = %0d at line %0d\n", liststmt_item.v[i].line_number, return_jump, liststmt_item.v[i].line_number);
 `endif
       d = pop();
       break;
