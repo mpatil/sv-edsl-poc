@@ -297,14 +297,6 @@ task Interp::visitRegRd(RegRd p);
   push(d2);
 endtask
 
-task Interp::visitWaitInterrupt(WaitInterrupt p);
-  /* Code For WaitInterrupt Goes Here */
-
-  p.listexpr_.accept(this);
-  p.expr_.accept(this);
-
-endtask
-
 task Interp::visitCeil(Ceil p);
   Datum d;
 

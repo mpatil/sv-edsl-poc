@@ -316,7 +316,6 @@ class Interp implements Visitor;
   extern virtual task visitWait(Wait p);
   extern virtual task visitFatal(Fatal p);
   extern virtual task visitRegRd(RegRd p);
-  extern virtual task visitWaitInterrupt(WaitInterrupt p);
   extern virtual task visitCeil(Ceil p);
   extern virtual task visitFloor(Floor p);
   extern virtual task visitLog2(Log2 p);

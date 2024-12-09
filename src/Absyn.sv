@@ -283,19 +283,6 @@ endtask
 
 
 
-/********************   WaitInterrupt    ********************/
-function WaitInterrupt::new(ListExpr p1, Expr p2);
-  listexpr_ = p1;
-  expr_ = p2;
-
-endfunction
-
-task WaitInterrupt::accept(Visitor v);
-  v.visitWaitInterrupt(this);
-endtask
-
-
-
 /********************   Ceil    ********************/
 function Ceil::new(Expr p1);
   expr_ = p1;

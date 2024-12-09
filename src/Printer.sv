@@ -472,30 +472,6 @@ task PrintAbsyn::visitRegRd(RegRd  p);
   _i_ = oldi;
 endtask
 
-task PrintAbsyn::visitWaitInterrupt(WaitInterrupt  p);
-
-  int oldi = _i_;
-  if (oldi > 0) render(`_L_PAREN);
-
-  render("intr_wait");
-
-  render("(");
-
-  render("(");
-
-  _i_ = 0; visitListExpr(p.listexpr_);
-  render(")");
-
-  render(",");
-
-  _i_ = 0; p.expr_.accept(this);
-  render(")");
-
-
-  if (oldi > 0) render(`_R_PAREN);
-  _i_ = oldi;
-endtask
-
 task PrintAbsyn::visitCeil(Ceil  p);
 
   int oldi = _i_;
@@ -1885,27 +1861,6 @@ task ShowAbsyn::visitRegRd(RegRd  p);
   bufAppend("(");
   bufAppend("RegRd");
   bufAppend("\"");
-  bufAppend("[");
-
-  if (p.expr_)  p.expr_.accept(this);
-
-  bufAppend("]");
-
-  bufAppend(" ");
-  bufAppend(")");
-endtask
-task ShowAbsyn::visitWaitInterrupt(WaitInterrupt  p);
-
-  bufAppend("(");
-  bufAppend("WaitInterrupt");
-  bufAppend("\"");
-  bufAppend("[");
-
-  if (p.listexpr_)  p.listexpr_.accept(this);
-
-  bufAppend("]");
-
-  bufAppend(" ");
   bufAppend("[");
 
   if (p.expr_)  p.expr_.accept(this);

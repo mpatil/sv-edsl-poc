@@ -121,7 +121,6 @@ endtask
 %token          _KW_function      /* function */
 %token          _KW_hex           /* hex */
 %token          _KW_if            /* if */
-%token          _KW_48            /* intr_wait */
 %token          _KW_log2          /* log2 */
 %token          _KW_print         /* print */
 %token          _KW_procedure     /* procedure */
@@ -236,7 +235,6 @@ Builtin_Task : _KW_print _LPAREN ListPrint_Arg _RPAREN {  $3.v.reverse ;$$ = Pri
   | _KW_fatal _LPAREN Expr _RPAREN {  $$ = Fatal::new ($3); $$.line_number = yy_mylinenumber; }
 ;
 Builtin_Fn : _KW_regrd _LPAREN Expr _RPAREN {  $$ = RegRd::new ($3); $$.line_number = yy_mylinenumber; }
-  | _KW_48 _LPAREN _LPAREN ListExpr _RPAREN _COMMA Expr _RPAREN {  $4.v.reverse ;$$ = WaitInterrupt::new ($4, $7); $$.line_number = yy_mylinenumber; }
   | _KW_ceil _LPAREN Expr _RPAREN {  $$ = Ceil::new ($3); $$.line_number = yy_mylinenumber; }
   | _KW_floor _LPAREN Expr _RPAREN {  $$ = Floor::new ($3); $$.line_number = yy_mylinenumber; }
   | _KW_log2 _LPAREN Expr _RPAREN {  $$ = Log2::new ($3); $$.line_number = yy_mylinenumber; }

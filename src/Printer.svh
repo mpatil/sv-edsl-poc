@@ -61,7 +61,6 @@ class PrintAbsyn implements Visitor;
   extern virtual task visitFatal(Fatal p);
   extern virtual task visitBuiltin_Fn(Builtin_Fn p); /* abstract class */
   extern virtual task visitRegRd(RegRd p);
-  extern virtual task visitWaitInterrupt(WaitInterrupt p);
   extern virtual task visitCeil(Ceil p);
   extern virtual task visitFloor(Floor p);
   extern virtual task visitLog2(Log2 p);
@@ -227,7 +226,6 @@ class ShowAbsyn implements Visitor;
   extern virtual task visitFatal(Fatal p);
   extern virtual task visitBuiltin_Fn(Builtin_Fn p); /* abstract class */
   extern virtual task visitRegRd(RegRd p);
-  extern virtual task visitWaitInterrupt(WaitInterrupt p);
   extern virtual task visitCeil(Ceil p);
   extern virtual task visitFloor(Floor p);
   extern virtual task visitLog2(Log2 p);

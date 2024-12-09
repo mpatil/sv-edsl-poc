@@ -81,7 +81,6 @@ IDENT [a-zA-Z0-9'_]
 <YYINITIAL>"function"      	 return `_KW_function;
 <YYINITIAL>"hex"      	 return `_KW_hex;
 <YYINITIAL>"if"      	 return `_KW_if;
-<YYINITIAL>"intr_wait"      	 return `_KW_48;
 <YYINITIAL>"log2"      	 return `_KW_log2;
 <YYINITIAL>"print"      	 return `_KW_print;
 <YYINITIAL>"procedure"      	 return `_KW_procedure;

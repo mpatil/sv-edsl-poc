@@ -74,7 +74,6 @@ typedef class RegWr;
 typedef class Wait;
 typedef class Fatal;
 typedef class RegRd;
-typedef class WaitInterrupt;
 typedef class Ceil;
 typedef class Floor;
 typedef class Log2;
@@ -203,7 +202,6 @@ interface class Visitor;
   pure virtual task visitWait(Wait p);
   pure virtual task visitFatal(Fatal p);
   pure virtual task visitRegRd(RegRd p);
-  pure virtual task visitWaitInterrupt(WaitInterrupt p);
   pure virtual task visitCeil(Ceil p);
   pure virtual task visitFloor(Floor p);
   pure virtual task visitLog2(Log2 p);
@@ -602,14 +600,6 @@ class RegRd extends Builtin_Fn;
   Expr expr_;
 
   extern function new(Expr p1);
-  extern virtual task accept(Visitor v);
-endclass
-
-class WaitInterrupt extends Builtin_Fn;
-  ListExpr listexpr_;
-  Expr expr_;
-
-  extern function new(ListExpr p1, Expr p2);
   extern virtual task accept(Visitor v);
 endclass
 

@@ -37,7 +37,6 @@ Wait.          Builtin_Task ::= "wait" "(" Expr ")";
 Fatal.         Builtin_Task ::= "fatal" "(" Expr ")";
 
 RegRd.         Builtin_Fn ::= "regrd" "(" Expr  ")";
-WaitInterrupt. Builtin_Fn ::= "intr_wait" "(" "(" [Expr] ")" "," Expr ")";
 Ceil.          Builtin_Fn ::= "ceil" "(" Expr ")";
 Floor.         Builtin_Fn ::= "floor" "(" Expr ")";
 Log2.          Builtin_Fn ::= "log2" "(" Expr ")";
