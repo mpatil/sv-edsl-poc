@@ -4,9 +4,10 @@
 %{
 `include "Absyn.svh"
 `include "bio.svh"
-`include "Lexer.svh"
 
-Biobuf b;
+class Parser;
+  Biobuf b;
+`include "Lexer.svh"
 
 typedef struct { int i; } YY_BUFFER_STATE;
 
@@ -195,7 +196,7 @@ endtask
 
 %start Program
 %{
-//`include "Lexer.svh"
+//
 %}
 
 %%
@@ -379,27 +380,31 @@ String_Literal : T_AnyChars {  $$ = StringLit::new ($1); $$.line_number = yy_myl
 
 %%
 
+endclass
+
 
 /* Entrypoint: parse Program from file. */
 function Program pProgram(string filename);
-  b = Bopen(filename, `OREAD);
-  yy_mylinenumber = 1;
-  initialize_lexer(0);
-  if (yyparse())
+automatic Parser p = new();
+  p.b = Bopen(filename, `OREAD);
+  p.yy_mylinenumber = 1;
+  p.initialize_lexer(0);
+  if (p.yyparse())
     return null; /* Failure */
   else
-    return YY_RESULT_Program_;/* Success */
+    return p.YY_RESULT_Program_;/* Success */
 endfunction
 
 /* Entrypoint: parse Program from string. */
 function Program psProgram(string str);
-  b = Bopens(str);
-  yy_mylinenumber = 1;
-  initialize_lexer(0);
-  if (yyparse())
+automatic Parser p = new();
+  p.b = Bopens(str);
+  p.yy_mylinenumber = 1;
+  p.initialize_lexer(0);
+  if (p.yyparse())
     return null; /* Failure */
   else
-    return YY_RESULT_Program_;/* Success */
+    return p.YY_RESULT_Program_;/* Success */
 endfunction
 
 

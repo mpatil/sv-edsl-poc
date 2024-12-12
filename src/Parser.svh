@@ -69,9 +69,10 @@
   //#line 5 "C.y"
 `include "Absyn.svh"
 `include "bio.svh"
-`include "Lexer.svh"
 
-Biobuf b;
+class Parser;
+  Biobuf b;
+`include "Lexer.svh"
 
 typedef struct { int i; } YY_BUFFER_STATE;
 
@@ -83,7 +84,7 @@ endfunction
 static Program  YY_RESULT_Program_ = null;
 
 
-  //#line 23 "C.y"
+  //#line 24 "C.y"
 typedef struct
 {
   int    _int;
@@ -124,7 +125,7 @@ typedef struct
   Number  number_;
   String_Literal  string_literal_;
 } YYSTYPE;
-  //#line 65 "C.y"
+  //#line 66 "C.y"
 task yyerror(string str);
   $display("error: line %0d: %s at %s\n", yy_mylinenumber, str, string'(yytext)); //'
   $fatal;
@@ -138,8 +139,8 @@ endtask
 
 
 
-  //#line 198 "C.y"
-/*`include "Lexer.svh"*/
+  //#line 199 "C.y"
+/**/
   static bit  yydebug;           //do I want debug output?
   int yynerrs;            //number of errors so far
   int yyerrflag;          //was there an error?
@@ -776,515 +777,515 @@ endtask
       yyval = dup_yyval(yyval);  //duplicate yyval if ParserVal is used as semantic value
       case(yyn)
       //########## USER-SUPPLIED ACTIONS ##########
-      1:  //#line 202 "C.y"
+      1:  //#line 203 "C.y"
       begin
           yyval.program_ = Program1::new (valstk[0].liststmt_item_); yyval.program_.line_number = yy_mylinenumber;YY_RESULT_Program_ = yyval.program_; 
       end
-      2:  //#line 204 "C.y"
+      2:  //#line 205 "C.y"
       begin
           yyval.liststmt_item_ = ListStmt_Item::new(); 
       end
-      3:  //#line 205 "C.y"
+      3:  //#line 206 "C.y"
       begin
           valstk[1].liststmt_item_.v.push_back(valstk[0].stmt_item_); yyval.liststmt_item_ = valstk[1].liststmt_item_; 
       end
-      4:  //#line 207 "C.y"
+      4:  //#line 208 "C.y"
       begin
           yyval.stmt_item_ = VarDeclStmt::new (valstk[1]._string); yyval.stmt_item_.line_number = yy_mylinenumber; 
       end
-      5:  //#line 208 "C.y"
+      5:  //#line 209 "C.y"
       begin
           yyval.stmt_item_ = VarAssDeclStmt::new (valstk[1].var_assignment_); yyval.stmt_item_.line_number = yy_mylinenumber; 
       end
-      6:  //#line 209 "C.y"
+      6:  //#line 210 "C.y"
       begin
           yyval.stmt_item_ = AssignmentStmt::new (valstk[1].var_assignment_); yyval.stmt_item_.line_number = yy_mylinenumber; 
       end
-      7:  //#line 210 "C.y"
+      7:  //#line 211 "C.y"
       begin
           yyval.stmt_item_ = ConditionalStmt::new (valstk[0].conditional_stmt_); yyval.stmt_item_.line_number = yy_mylinenumber; 
       end
-      8:  //#line 211 "C.y"
+      8:  //#line 212 "C.y"
       begin
           yyval.stmt_item_ = IncDecOpStmt::new (valstk[2]._string, valstk[1].inc_or_dec_operator_); yyval.stmt_item_.line_number = yy_mylinenumber; 
       end
-      9:  //#line 212 "C.y"
+      9:  //#line 213 "C.y"
       begin
           yyval.stmt_item_ = LoopStmt::new (valstk[0].loop_stmt_); yyval.stmt_item_.line_number = yy_mylinenumber; 
       end
-      10:  //#line 213 "C.y"
+      10:  //#line 214 "C.y"
       begin
           yyval.stmt_item_ = JumpStmt::new (valstk[1].jump_stmt_); yyval.stmt_item_.line_number = yy_mylinenumber; 
       end
-      11:  //#line 214 "C.y"
+      11:  //#line 215 "C.y"
       begin
           yyval.stmt_item_ = BlockStmt::new (valstk[1].liststmt_item_); yyval.stmt_item_.line_number = yy_mylinenumber; 
       end
-      12:  //#line 215 "C.y"
+      12:  //#line 216 "C.y"
       begin
           yyval.stmt_item_ = BuiltInStmt::new (valstk[1].builtin_task_); yyval.stmt_item_.line_number = yy_mylinenumber; 
       end
-      13:  //#line 216 "C.y"
+      13:  //#line 217 "C.y"
       begin
           yyval.stmt_item_ = ProcDefStmt::new (valstk[0].proc_definition_); yyval.stmt_item_.line_number = yy_mylinenumber; 
       end
-      14:  //#line 217 "C.y"
+      14:  //#line 218 "C.y"
       begin
           yyval.stmt_item_ = FuncDefStmt::new (valstk[0].func_definition_); yyval.stmt_item_.line_number = yy_mylinenumber; 
       end
-      15:  //#line 218 "C.y"
+      15:  //#line 219 "C.y"
       begin
           yyval.stmt_item_ = ProcCallStmt::new (valstk[1].funcorproccall_); yyval.stmt_item_.line_number = yy_mylinenumber; 
       end
-      16:  //#line 220 "C.y"
+      16:  //#line 221 "C.y"
       begin
           yyval.listexpr_ = ListExpr::new(); 
       end
-      17:  //#line 221 "C.y"
+      17:  //#line 222 "C.y"
       begin
           yyval.listexpr_ = ListExpr::new(); yyval.listexpr_.v.push_back(valstk[0].expr_); 
       end
-      18:  //#line 222 "C.y"
+      18:  //#line 223 "C.y"
       begin
           valstk[0].listexpr_.v.push_back(valstk[2].expr_); yyval.listexpr_ = valstk[0].listexpr_; 
       end
-      19:  //#line 224 "C.y"
+      19:  //#line 225 "C.y"
       begin
           yyval.var_assignment_ = Assignment::new (valstk[3]._string, valstk[2].range_expr_opt_, valstk[0].expr_); yyval.var_assignment_.line_number = yy_mylinenumber; 
       end
-      20:  //#line 226 "C.y"
+      20:  //#line 227 "C.y"
       begin
           yyval.jump_stmt_ = Break::new (); yyval.jump_stmt_.line_number = yy_mylinenumber; 
       end
-      21:  //#line 227 "C.y"
+      21:  //#line 228 "C.y"
       begin
           yyval.jump_stmt_ = Continue::new (); yyval.jump_stmt_.line_number = yy_mylinenumber; 
       end
-      22:  //#line 228 "C.y"
+      22:  //#line 229 "C.y"
       begin
           yyval.jump_stmt_ = Return::new (valstk[0].expr_opt_); yyval.jump_stmt_.line_number = yy_mylinenumber; 
       end
-      23:  //#line 230 "C.y"
+      23:  //#line 231 "C.y"
       begin
           valstk[1].listexpr_.v.reverse ;yyval.funcorproccall_ = Call::new (valstk[3]._string, valstk[1].listexpr_); yyval.funcorproccall_.line_number = yy_mylinenumber; 
       end
-      24:  //#line 232 "C.y"
+      24:  //#line 233 "C.y"
       begin
           valstk[1].listprint_arg_.v.reverse ;yyval.builtin_task_ = Print::new (valstk[1].listprint_arg_); yyval.builtin_task_.line_number = yy_mylinenumber; 
       end
-      25:  //#line 233 "C.y"
+      25:  //#line 234 "C.y"
       begin
           yyval.builtin_task_ = RegWr::new (valstk[3].expr_, valstk[1].expr_); yyval.builtin_task_.line_number = yy_mylinenumber; 
       end
-      26:  //#line 234 "C.y"
+      26:  //#line 235 "C.y"
       begin
           yyval.builtin_task_ = Wait::new (valstk[1].expr_); yyval.builtin_task_.line_number = yy_mylinenumber; 
       end
-      27:  //#line 235 "C.y"
+      27:  //#line 236 "C.y"
       begin
           yyval.builtin_task_ = Fatal::new (valstk[1].expr_); yyval.builtin_task_.line_number = yy_mylinenumber; 
       end
-      28:  //#line 237 "C.y"
+      28:  //#line 238 "C.y"
       begin
           yyval.builtin_fn_ = RegRd::new (valstk[1].expr_); yyval.builtin_fn_.line_number = yy_mylinenumber; 
       end
-      29:  //#line 238 "C.y"
+      29:  //#line 239 "C.y"
       begin
           yyval.builtin_fn_ = Ceil::new (valstk[1].expr_); yyval.builtin_fn_.line_number = yy_mylinenumber; 
       end
-      30:  //#line 239 "C.y"
+      30:  //#line 240 "C.y"
       begin
           yyval.builtin_fn_ = Floor::new (valstk[1].expr_); yyval.builtin_fn_.line_number = yy_mylinenumber; 
       end
-      31:  //#line 240 "C.y"
+      31:  //#line 241 "C.y"
       begin
           yyval.builtin_fn_ = Log2::new (valstk[1].expr_); yyval.builtin_fn_.line_number = yy_mylinenumber; 
       end
-      32:  //#line 241 "C.y"
+      32:  //#line 242 "C.y"
       begin
           yyval.builtin_fn_ = Sys::new (valstk[1].string_literal_); yyval.builtin_fn_.line_number = yy_mylinenumber; 
       end
-      33:  //#line 242 "C.y"
+      33:  //#line 243 "C.y"
       begin
           yyval.builtin_fn_ = IsDefd::new (valstk[1]._string); yyval.builtin_fn_.line_number = yy_mylinenumber; 
       end
-      34:  //#line 244 "C.y"
+      34:  //#line 245 "C.y"
       begin
           yyval.print_arg_ = PrExpr::new (valstk[0].expr_); yyval.print_arg_.line_number = yy_mylinenumber; 
       end
-      35:  //#line 245 "C.y"
+      35:  //#line 246 "C.y"
       begin
           yyval.print_arg_ = PrString::new (valstk[0].string_literal_); yyval.print_arg_.line_number = yy_mylinenumber; 
       end
-      36:  //#line 246 "C.y"
+      36:  //#line 247 "C.y"
       begin
           yyval.print_arg_ = PrHex::new (valstk[1].expr_); yyval.print_arg_.line_number = yy_mylinenumber; 
       end
-      37:  //#line 247 "C.y"
+      37:  //#line 248 "C.y"
       begin
           yyval.print_arg_ = PrBin::new (valstk[1].expr_); yyval.print_arg_.line_number = yy_mylinenumber; 
       end
-      38:  //#line 249 "C.y"
+      38:  //#line 250 "C.y"
       begin
           yyval.listprint_arg_ = ListPrint_Arg::new(); yyval.listprint_arg_.v.push_back(valstk[0].print_arg_); 
       end
-      39:  //#line 250 "C.y"
+      39:  //#line 251 "C.y"
       begin
           valstk[0].listprint_arg_.v.push_back(valstk[2].print_arg_); yyval.listprint_arg_ = valstk[0].listprint_arg_; 
       end
-      40:  //#line 252 "C.y"
+      40:  //#line 253 "C.y"
       begin
           yyval.proc_definition_ = ProcDef::new (valstk[0].definition_); yyval.proc_definition_.line_number = yy_mylinenumber; 
       end
-      41:  //#line 254 "C.y"
+      41:  //#line 255 "C.y"
       begin
           yyval.func_definition_ = FuncDef::new (valstk[0].definition_); yyval.func_definition_.line_number = yy_mylinenumber; 
       end
-      42:  //#line 256 "C.y"
+      42:  //#line 257 "C.y"
       begin
           valstk[2].listformal_arg_.v.reverse ;yyval.definition_ = Defn::new (valstk[4]._string, valstk[2].listformal_arg_, valstk[0].stmt_item_); yyval.definition_.line_number = yy_mylinenumber; 
       end
-      43:  //#line 258 "C.y"
+      43:  //#line 259 "C.y"
       begin
           yyval.formal_arg_ = Formal::new (valstk[0]._string); yyval.formal_arg_.line_number = yy_mylinenumber; 
       end
-      44:  //#line 260 "C.y"
+      44:  //#line 261 "C.y"
       begin
           yyval.listformal_arg_ = ListFormal_Arg::new(); 
       end
-      45:  //#line 261 "C.y"
+      45:  //#line 262 "C.y"
       begin
           yyval.listformal_arg_ = ListFormal_Arg::new(); yyval.listformal_arg_.v.push_back(valstk[0].formal_arg_); 
       end
-      46:  //#line 262 "C.y"
+      46:  //#line 263 "C.y"
       begin
           valstk[0].listformal_arg_.v.push_back(valstk[2].formal_arg_); yyval.listformal_arg_ = valstk[0].listformal_arg_; 
       end
-      47:  //#line 264 "C.y"
+      47:  //#line 265 "C.y"
       begin
           yyval.else_if_ = ElsIf::new (valstk[2].expr_, valstk[0].stmt_item_); yyval.else_if_.line_number = yy_mylinenumber; 
       end
-      48:  //#line 266 "C.y"
+      48:  //#line 267 "C.y"
       begin
           yyval.listelse_if_ = ListElse_If::new(); 
       end
-      49:  //#line 267 "C.y"
+      49:  //#line 268 "C.y"
       begin
           valstk[1].listelse_if_.v.push_back(valstk[0].else_if_); yyval.listelse_if_ = valstk[1].listelse_if_; 
       end
-      50:  //#line 269 "C.y"
+      50:  //#line 270 "C.y"
       begin
           yyval.else_opt_ = ElseIsEmpty::new (); yyval.else_opt_.line_number = yy_mylinenumber; 
       end
-      51:  //#line 270 "C.y"
+      51:  //#line 271 "C.y"
       begin
           yyval.else_opt_ = ElseIsElse::new (valstk[0].stmt_item_); yyval.else_opt_.line_number = yy_mylinenumber; 
       end
-      52:  //#line 272 "C.y"
+      52:  //#line 273 "C.y"
       begin
           yyval.conditional_stmt_ = If::new (valstk[4].expr_, valstk[2].stmt_item_, valstk[1].listelse_if_, valstk[0].else_opt_); yyval.conditional_stmt_.line_number = yy_mylinenumber; 
       end
-      53:  //#line 274 "C.y"
+      53:  //#line 275 "C.y"
       begin
           yyval.loop_stmt_ = While::new (valstk[2].expr_, valstk[0].stmt_item_); yyval.loop_stmt_.line_number = yy_mylinenumber; 
       end
-      54:  //#line 275 "C.y"
+      54:  //#line 276 "C.y"
       begin
           yyval.loop_stmt_ = For::new (valstk[6].for_init_opt_, valstk[4].expr_opt_, valstk[2].for_step_opt_, valstk[0].stmt_item_); yyval.loop_stmt_.line_number = yy_mylinenumber; 
       end
-      55:  //#line 276 "C.y"
+      55:  //#line 277 "C.y"
       begin
           yyval.loop_stmt_ = forever__(valstk[0].stmt_item_); 
       end
-      56:  //#line 278 "C.y"
+      56:  //#line 279 "C.y"
       begin
           yyval.for_init_opt_ = ForInitIsEmpty::new (); yyval.for_init_opt_.line_number = yy_mylinenumber; 
       end
-      57:  //#line 279 "C.y"
+      57:  //#line 280 "C.y"
       begin
           yyval.for_init_opt_ = ForInitIsInit::new (valstk[0].var_assignment_); yyval.for_init_opt_.line_number = yy_mylinenumber; 
       end
-      58:  //#line 280 "C.y"
+      58:  //#line 281 "C.y"
       begin
           yyval.for_init_opt_ = ForInitIsVarInit::new (valstk[0].var_assignment_); yyval.for_init_opt_.line_number = yy_mylinenumber; 
       end
-      59:  //#line 282 "C.y"
+      59:  //#line 283 "C.y"
       begin
           yyval.expr_opt_ = ExprIsEmpty::new (); yyval.expr_opt_.line_number = yy_mylinenumber; 
       end
-      60:  //#line 283 "C.y"
+      60:  //#line 284 "C.y"
       begin
           yyval.expr_opt_ = ExprIsExpr::new (valstk[0].expr_); yyval.expr_opt_.line_number = yy_mylinenumber; 
       end
-      61:  //#line 285 "C.y"
+      61:  //#line 286 "C.y"
       begin
           yyval.for_step_opt_ = ForStepIsEmpty::new (); yyval.for_step_opt_.line_number = yy_mylinenumber; 
       end
-      62:  //#line 286 "C.y"
+      62:  //#line 287 "C.y"
       begin
           yyval.for_step_opt_ = ForStepIsAssignment::new (valstk[0].var_assignment_); yyval.for_step_opt_.line_number = yy_mylinenumber; 
       end
-      63:  //#line 287 "C.y"
+      63:  //#line 288 "C.y"
       begin
           yyval.for_step_opt_ = ForStepIsIncOrDec::new (valstk[1]._string, valstk[0].inc_or_dec_operator_); yyval.for_step_opt_.line_number = yy_mylinenumber; 
       end
-      64:  //#line 289 "C.y"
+      64:  //#line 290 "C.y"
       begin
           yyval.op_ = valstk[0].op_; yyval.op_.line_number = yy_mylinenumber; 
       end
-      65:  //#line 290 "C.y"
+      65:  //#line 291 "C.y"
       begin
           yyval.op_ = valstk[0].op_; yyval.op_.line_number = yy_mylinenumber; 
       end
-      66:  //#line 291 "C.y"
+      66:  //#line 292 "C.y"
       begin
           yyval.op_ = valstk[0].op_; yyval.op_.line_number = yy_mylinenumber; 
       end
-      67:  //#line 292 "C.y"
+      67:  //#line 293 "C.y"
       begin
           yyval.op_ = valstk[0].op_; yyval.op_.line_number = yy_mylinenumber; 
       end
-      68:  //#line 293 "C.y"
+      68:  //#line 294 "C.y"
       begin
           yyval.op_ = valstk[0].op_; yyval.op_.line_number = yy_mylinenumber; 
       end
-      69:  //#line 294 "C.y"
+      69:  //#line 295 "C.y"
       begin
           yyval.op_ = valstk[0].op_; yyval.op_.line_number = yy_mylinenumber; 
       end
-      70:  //#line 295 "C.y"
+      70:  //#line 296 "C.y"
       begin
           yyval.op_ = valstk[0].op_; yyval.op_.line_number = yy_mylinenumber; 
       end
-      71:  //#line 297 "C.y"
+      71:  //#line 298 "C.y"
       begin
           yyval.op_ = Pow::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      72:  //#line 299 "C.y"
+      72:  //#line 300 "C.y"
       begin
           yyval.op_ = Mul::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      73:  //#line 300 "C.y"
+      73:  //#line 301 "C.y"
       begin
           yyval.op_ = Div::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      74:  //#line 301 "C.y"
+      74:  //#line 302 "C.y"
       begin
           yyval.op_ = Mod::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      75:  //#line 303 "C.y"
+      75:  //#line 304 "C.y"
       begin
           yyval.op_ = Add::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      76:  //#line 304 "C.y"
+      76:  //#line 305 "C.y"
       begin
           yyval.op_ = Sub::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      77:  //#line 306 "C.y"
+      77:  //#line 307 "C.y"
       begin
           yyval.op_ = LAnd::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      78:  //#line 307 "C.y"
+      78:  //#line 308 "C.y"
       begin
           yyval.op_ = Xor::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      79:  //#line 308 "C.y"
+      79:  //#line 309 "C.y"
       begin
           yyval.op_ = LOr::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      80:  //#line 310 "C.y"
+      80:  //#line 311 "C.y"
       begin
           yyval.op_ = Rsh::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      81:  //#line 311 "C.y"
+      81:  //#line 312 "C.y"
       begin
           yyval.op_ = Lsh::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      82:  //#line 313 "C.y"
+      82:  //#line 314 "C.y"
       begin
           yyval.op_ = Lt::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      83:  //#line 314 "C.y"
+      83:  //#line 315 "C.y"
       begin
           yyval.op_ = Leq::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      84:  //#line 315 "C.y"
+      84:  //#line 316 "C.y"
       begin
           yyval.op_ = Gt::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      85:  //#line 316 "C.y"
+      85:  //#line 317 "C.y"
       begin
           yyval.op_ = Geq::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      86:  //#line 317 "C.y"
+      86:  //#line 318 "C.y"
       begin
           yyval.op_ = Eq::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      87:  //#line 318 "C.y"
+      87:  //#line 319 "C.y"
       begin
           yyval.op_ = Neq::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      88:  //#line 320 "C.y"
+      88:  //#line 321 "C.y"
       begin
           yyval.op_ = And::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      89:  //#line 321 "C.y"
+      89:  //#line 322 "C.y"
       begin
           yyval.op_ = Or::new (); yyval.op_.line_number = yy_mylinenumber; 
       end
-      90:  //#line 323 "C.y"
+      90:  //#line 324 "C.y"
       begin
           yyval.expr_ = ExprPrim::new (valstk[0].primary_); yyval.expr_.line_number = yy_mylinenumber; 
       end
-      91:  //#line 324 "C.y"
+      91:  //#line 325 "C.y"
       begin
           yyval.expr_ = valstk[1].expr_; yyval.expr_.line_number = yy_mylinenumber; 
       end
-      92:  //#line 326 "C.y"
+      92:  //#line 327 "C.y"
       begin
           yyval.expr_ = ExprUnary::new (valstk[1].unary_operator_, valstk[0].expr_); yyval.expr_.line_number = yy_mylinenumber; 
       end
-      93:  //#line 327 "C.y"
+      93:  //#line 328 "C.y"
       begin
           yyval.expr_ = ExprBltin::new (valstk[0].builtin_fn_); yyval.expr_.line_number = yy_mylinenumber; 
       end
-      94:  //#line 328 "C.y"
+      94:  //#line 329 "C.y"
       begin
           yyval.expr_ = ExprFuncCall::new (valstk[0].funcorproccall_); yyval.expr_.line_number = yy_mylinenumber; 
       end
-      95:  //#line 329 "C.y"
+      95:  //#line 330 "C.y"
       begin
           yyval.expr_ = valstk[0].expr_; yyval.expr_.line_number = yy_mylinenumber; 
       end
-      96:  //#line 331 "C.y"
+      96:  //#line 332 "C.y"
       begin
           yyval.expr_ = op_(valstk[2].expr_, valstk[1].op_, valstk[0].expr_); 
       end
-      97:  //#line 332 "C.y"
+      97:  //#line 333 "C.y"
       begin
           yyval.expr_ = valstk[0].expr_; yyval.expr_.line_number = yy_mylinenumber; 
       end
-      98:  //#line 334 "C.y"
+      98:  //#line 335 "C.y"
       begin
           yyval.expr_ = op_(valstk[2].expr_, valstk[1].op_, valstk[0].expr_); 
       end
-      99:  //#line 335 "C.y"
+      99:  //#line 336 "C.y"
       begin
           yyval.expr_ = valstk[0].expr_; yyval.expr_.line_number = yy_mylinenumber; 
       end
-      100:  //#line 337 "C.y"
+      100:  //#line 338 "C.y"
       begin
           yyval.expr_ = op_(valstk[2].expr_, valstk[1].op_, valstk[0].expr_); 
       end
-      101:  //#line 338 "C.y"
+      101:  //#line 339 "C.y"
       begin
           yyval.expr_ = valstk[0].expr_; yyval.expr_.line_number = yy_mylinenumber; 
       end
-      102:  //#line 340 "C.y"
+      102:  //#line 341 "C.y"
       begin
           yyval.expr_ = op_(valstk[2].expr_, valstk[1].op_, valstk[0].expr_); 
       end
-      103:  //#line 341 "C.y"
+      103:  //#line 342 "C.y"
       begin
           yyval.expr_ = valstk[0].expr_; yyval.expr_.line_number = yy_mylinenumber; 
       end
-      104:  //#line 343 "C.y"
+      104:  //#line 344 "C.y"
       begin
           yyval.expr_ = op_(valstk[2].expr_, valstk[1].op_, valstk[0].expr_); 
       end
-      105:  //#line 344 "C.y"
+      105:  //#line 345 "C.y"
       begin
           yyval.expr_ = valstk[0].expr_; yyval.expr_.line_number = yy_mylinenumber; 
       end
-      106:  //#line 346 "C.y"
+      106:  //#line 347 "C.y"
       begin
           yyval.expr_ = op_(valstk[2].expr_, valstk[1].op_, valstk[0].expr_); 
       end
-      107:  //#line 347 "C.y"
+      107:  //#line 348 "C.y"
       begin
           yyval.expr_ = valstk[0].expr_; yyval.expr_.line_number = yy_mylinenumber; 
       end
-      108:  //#line 349 "C.y"
+      108:  //#line 350 "C.y"
       begin
           yyval.expr_ = op_(valstk[2].expr_, valstk[1].op_, valstk[0].expr_); 
       end
-      109:  //#line 350 "C.y"
+      109:  //#line 351 "C.y"
       begin
           yyval.expr_ = valstk[0].expr_; yyval.expr_.line_number = yy_mylinenumber; 
       end
-      110:  //#line 352 "C.y"
+      110:  //#line 353 "C.y"
       begin
           yyval.expr_ = ExprTernary::new (valstk[4].expr_, valstk[2].expr_, valstk[0].expr_); yyval.expr_.line_number = yy_mylinenumber; 
       end
-      111:  //#line 353 "C.y"
+      111:  //#line 354 "C.y"
       begin
           yyval.expr_ = valstk[0].expr_; yyval.expr_.line_number = yy_mylinenumber; 
       end
-      112:  //#line 355 "C.y"
+      112:  //#line 356 "C.y"
       begin
           yyval.primary_ = PrimIdent::new (valstk[1]._string, valstk[0].range_expr_opt_); yyval.primary_.line_number = yy_mylinenumber; 
       end
-      113:  //#line 356 "C.y"
+      113:  //#line 357 "C.y"
       begin
           yyval.primary_ = PrimNumber::new (valstk[0].number_); yyval.primary_.line_number = yy_mylinenumber; 
       end
-      114:  //#line 358 "C.y"
+      114:  //#line 359 "C.y"
       begin
           yyval.range_expr_opt_ = RangeExprIsEmpty::new (); yyval.range_expr_opt_.line_number = yy_mylinenumber; 
       end
-      115:  //#line 359 "C.y"
+      115:  //#line 360 "C.y"
       begin
           yyval.range_expr_opt_ = RangeExprIsRange::new (valstk[1].range_expr_); yyval.range_expr_opt_.line_number = yy_mylinenumber; 
       end
-      116:  //#line 361 "C.y"
+      116:  //#line 362 "C.y"
       begin
           yyval.range_expr_ = RangeExprBit::new (valstk[0].expr_); yyval.range_expr_.line_number = yy_mylinenumber; 
       end
-      117:  //#line 362 "C.y"
+      117:  //#line 363 "C.y"
       begin
           yyval.range_expr_ = RangeExprRange::new (valstk[2].expr_, valstk[0].expr_); yyval.range_expr_.line_number = yy_mylinenumber; 
       end
-      118:  //#line 364 "C.y"
+      118:  //#line 365 "C.y"
       begin
           yyval.unary_operator_ = UnaryPlus::new (); yyval.unary_operator_.line_number = yy_mylinenumber; 
       end
-      119:  //#line 365 "C.y"
+      119:  //#line 366 "C.y"
       begin
           yyval.unary_operator_ = UnaryMinus::new (); yyval.unary_operator_.line_number = yy_mylinenumber; 
       end
-      120:  //#line 366 "C.y"
+      120:  //#line 367 "C.y"
       begin
           yyval.unary_operator_ = UnaryNot::new (); yyval.unary_operator_.line_number = yy_mylinenumber; 
       end
-      121:  //#line 367 "C.y"
+      121:  //#line 368 "C.y"
       begin
           yyval.unary_operator_ = UnaryComp::new (); yyval.unary_operator_.line_number = yy_mylinenumber; 
       end
-      122:  //#line 369 "C.y"
+      122:  //#line 370 "C.y"
       begin
           yyval.inc_or_dec_operator_ = Incr::new (); yyval.inc_or_dec_operator_.line_number = yy_mylinenumber; 
       end
-      123:  //#line 370 "C.y"
+      123:  //#line 371 "C.y"
       begin
           yyval.inc_or_dec_operator_ = Decr::new (); yyval.inc_or_dec_operator_.line_number = yy_mylinenumber; 
       end
-      124:  //#line 372 "C.y"
+      124:  //#line 373 "C.y"
       begin
           yyval.number_ = Decimal::new (valstk[0]._string); yyval.number_.line_number = yy_mylinenumber; 
       end
-      125:  //#line 373 "C.y"
+      125:  //#line 374 "C.y"
       begin
           yyval.number_ = Binary::new (valstk[0]._string); yyval.number_.line_number = yy_mylinenumber; 
       end
-      126:  //#line 374 "C.y"
+      126:  //#line 375 "C.y"
       begin
           yyval.number_ = Hex::new (valstk[0]._string); yyval.number_.line_number = yy_mylinenumber; 
       end
-      127:  //#line 375 "C.y"
+      127:  //#line 376 "C.y"
       begin
           yyval.number_ = Real::new (valstk[0]._string); yyval.number_.line_number = yy_mylinenumber; 
       end
-      128:  //#line 377 "C.y"
+      128:  //#line 378 "C.y"
       begin
           yyval.string_literal_ = StringLit::new (valstk[0]._string); yyval.string_literal_.line_number = yy_mylinenumber; 
       end
@@ -1343,29 +1344,33 @@ endtask
   endtask
   
 
-  //#line 381 "C.y"
+  //#line 382 "C.y"
+
+endclass
 
 
 /* Entrypoint: parse Program from file. */
 function Program pProgram(string filename);
-  b = Bopen(filename, `OREAD);
-  yy_mylinenumber = 1;
-  initialize_lexer(0);
-  if (yyparse())
+automatic Parser p = new();
+  p.b = Bopen(filename, `OREAD);
+  p.yy_mylinenumber = 1;
+  p.initialize_lexer(0);
+  if (p.yyparse())
     return null; /* Failure */
   else
-    return YY_RESULT_Program_;/* Success */
+    return p.YY_RESULT_Program_;/* Success */
 endfunction
 
 /* Entrypoint: parse Program from string. */
 function Program psProgram(string str);
-  b = Bopens(str);
-  yy_mylinenumber = 1;
-  initialize_lexer(0);
-  if (yyparse())
+automatic Parser p = new();
+  p.b = Bopens(str);
+  p.yy_mylinenumber = 1;
+  p.initialize_lexer(0);
+  if (p.yyparse())
     return null; /* Failure */
   else
-    return YY_RESULT_Program_;/* Success */
+    return p.YY_RESULT_Program_;/* Success */
 endfunction
 
 
