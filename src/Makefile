@@ -14,10 +14,10 @@ QRUN_OPTS = -64 -sv -mfcu -permissive -l comp.log -suppress 2875,2240 +incdir+./
 all : qrun
 
 clean :
-	rm -rf CParser.svh CLexer.svh qrun.out test-vcs
+	rm -rf C/CParser.svh C/CLexer.svh qrun.out test-vcs
 
 distclean : clean
-	rm -f C/CAbsyn.svh C/CAbsyn.sv C.l C.y C/CPrinter.sv C/CPrinter.svh C/CInterp.sv C/CInterp.svh Test.sv C_pkg.sv C.core comp.log modelsim.ini C/*.bak C/y.output Makefile C.tex
+	rm -f C/CAbsyn.svh C/CAbsyn.sv C.l C.y C/CPrinter.sv C/CPrinter.svh C/CInterp.sv C/CInterp.svh Test.sv C/C_pkg.sv C/C.core comp.log modelsim.ini C/*.bak y.output Makefile C.tex
 
 .PHONY: qrun
 qrun : fusesoc Test.sv
@@ -30,6 +30,7 @@ C/CLexer.svh : C.l
 C/CParser.svh : C.y
 	${SVACC} ${SVACC_OPTS} C.y
 	mv Parser.svh C/CParser.svh
+	cp ${YACCPATH}/bio.svh C
 
 .PHONY: fusesoc
 fusesoc : C/CParser.svh C/CLexer.svh
