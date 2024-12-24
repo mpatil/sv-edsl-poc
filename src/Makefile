@@ -14,22 +14,23 @@ QRUN_OPTS = -64 -sv -mfcu -permissive -l comp.log -suppress 2875,2240 +incdir+./
 all : qrun
 
 clean :
-	rm -rf Parser.svh Lexer.svh qrun.out test-vcs
+	rm -rf CParser.svh CLexer.svh qrun.out test-vcs
 
 distclean : clean
-	rm -f Absyn.svh Absyn.sv C.l C.y Printer.sv Printer.svh Interp.sv Interp.svh Test.sv C_pkg.sv C.core comp.log modelsim.ini *.bak y.output Makefile C.tex
+	rm -f C/CAbsyn.svh C/CAbsyn.sv C.l C.y C/CPrinter.sv C/CPrinter.svh C/CInterp.sv C/CInterp.svh Test.sv C_pkg.sv C.core comp.log modelsim.ini C/*.bak C/y.output Makefile C.tex
 
 .PHONY: qrun
 qrun : fusesoc Test.sv
 	${QRUN} ${QRUN_OPTS} -F test-vcs/lib_interp_C_0.scr Test.sv +input=test.w
 
-Lexer.svh : C.l
+C/CLexer.svh : C.l
 	${SVLEX} ${SVLEX_OPTS} C.l
-	mv lex.yy.v Lexer.svh
+	mv lex.yy.v C/CLexer.svh
 
-Parser.svh : C.y
+C/CParser.svh : C.y
 	${SVACC} ${SVACC_OPTS} C.y
+	mv Parser.svh C/CParser.svh
 
 .PHONY: fusesoc
-fusesoc : Parser.svh Lexer.svh
+fusesoc : C/CParser.svh C/CLexer.svh
 	fusesoc --cores-root . run --no-export --target=test --build-root=. --setup lib:interp:C

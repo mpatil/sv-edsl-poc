@@ -2,7 +2,7 @@
 
 /*** Generated Pretty Printer and Abstract Syntax Viewer ***/
 
-`include "Printer.svh"
+`include "C/CPrinter.svh"
 `define INDENT_WIDTH 2
 
 

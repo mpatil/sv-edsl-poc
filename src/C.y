@@ -2,12 +2,12 @@
 
 /*************************************************/
 %{
-`include "Absyn.svh"
+`include "C/CAbsyn.svh"
 `include "bio.svh"
 
 class Parser;
   Biobuf b;
-`include "Lexer.svh"
+`include "C/CLexer.svh"
 
 typedef struct { int i; } YY_BUFFER_STATE;
 

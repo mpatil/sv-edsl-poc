@@ -7,22 +7,22 @@ filesets:
   pkg:
     files:
 
-      - Absyn.svh: {is_include_file: true}
-      - Interp.svh: {is_include_file: true}
-      - Lexer.svh: {is_include_file: true}
-      - Printer.svh: {is_include_file: true}
+      - CAbsyn.svh: {is_include_file: true}
+      - CInterp.svh: {is_include_file: true}
+      - CLexer.svh: {is_include_file: true}
+      - CPrinter.svh: {is_include_file: true}
       - bio.svh: {is_include_file: true}
-      - Parser.svh: {is_include_file: true}
-      - Absyn.sv: {is_include_file: true}
-      - Interp.sv: {is_include_file: true}
-      - Printer.sv: {is_include_file: true}
+      - CParser.svh: {is_include_file: true}
+      - CAbsyn.sv: {is_include_file: true}
+      - CInterp.sv: {is_include_file: true}
+      - CPrinter.sv: {is_include_file: true}
 
       - C_pkg.sv
     file_type: systemVerilogSource
 
   tb:
     files:
-      - Test.sv
+      - ../Test.sv
     file_type: systemVerilogSource
 
 targets:

@@ -6,7 +6,8 @@
    List->accept() does NOT traverse the list. This allows different
    algorithms to use context information differently. */
 
-`include "Interp.svh"
+`include "C/CInterp.svh"
+
 
 task Interp::visitProgram(Program p); endtask //abstract class
 task Interp::visitStmt_Item(Stmt_Item p); endtask //abstract class
