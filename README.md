@@ -3,10 +3,16 @@ Proof of concept of embedding a DSL into SystemVerilog.
 
 ## Requirements
 1. fusesoc
-1. [stack](https://docs.haskellstack.org/en/stable/install_and_upgrade/) -- install using `curl -sSL https://get.haskellstack.org/ | sh` 
+1. Optional... [stack](https://docs.haskellstack.org/en/stable/install_and_upgrade/) -- install using `curl -sSL https://get.haskellstack.org/ | sh` 
 1. eda simulator -- only questa is tested right now.
 
-if EDSL_ROOT is where you have checked out this repository, then
+If you want to just run the example, then
+
+```
+make -C src
+```
+
+If you want to develop the language further and if EDSL_ROOT is where you have checked out this repository, then ...
 
 ```
 git submodule update --init --recursive
