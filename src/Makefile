@@ -21,30 +21,11 @@ TEST_INPUT = ../../test.w
 
 all : run
 
-run : fusesoc Test.sv
-	@if command -v ${QRUN} >/dev/null 2>&1; then \
-	  ${MAKE} qrun; \
-	elif command -v ${VCS} >/dev/null 2>&1; then \
-	  ${MAKE} vcs; \
-	else \
-	  echo "Neither ${QRUN} nor ${VCS} found on PATH"; \
-	  exit 127; \
-	fi
-
 clean :
 	rm -rf C/CParser.svh C/CLexer.svh qrun.out simv simv.daidir csrc ucli.key test-vcs ${FUSESOC_RUN_DIR}
 
 distclean : clean
-	rm -f C/CAbsyn.svh C/CAbsyn.sv C.l C.y C/CPrinter.sv C/CPrinter.svh C/CInterp.sv C/CInterp.svh Test.sv C/C_pkg.sv C/C.core comp.log vcs.log modelsim.ini C/*.bak y.output Makefile C.tex
-
-.PHONY: qrun
-qrun : fusesoc Test.sv
-	cd ${TEST_VCS_DIR} && ${QRUN} ${QRUN_OPTS} -F ${SIM_SCRIPT} ../../../Test.sv +input=${TEST_INPUT}
-
-.PHONY: vcs
-vcs : fusesoc Test.sv
-	cd ${TEST_VCS_DIR} && ${VCS} ${VCS_OPTS} +incdir+../.. -f ${SIM_SCRIPT} -top ${TOPLEVEL} -o ${VCS_SIM}
-	cd ${TEST_VCS_DIR} && ./${VCS_SIM} -l vcs.log +input=${TEST_INPUT}
+	rm -f C/CAbsyn.svh C/CAbsyn.sv C.l C.y C/CPrinter.sv C/CPrinter.svh C/CInterpBase.sv C/CInterpBase.svh Test.sv C/C_pkg.sv C/C.core comp.log vcs.log modelsim.ini C/*.bak y.output Makefile C.tex
 
 C/CLexer.svh : C.l
 	${SVLEX} ${SVLEX_OPTS} C.l
@@ -59,3 +40,22 @@ C/CParser.svh : C.y
 .PHONY: fusesoc
 fusesoc : C/CParser.svh C/CLexer.svh
 	fusesoc --cores-root C run --no-export --target=test --build-root=. --setup lib:interp:C
+
+run : fusesoc Test.sv
+	@if command -v ${QRUN} >/dev/null 2>&1; then \
+	  ${MAKE} qrun; \
+	elif command -v ${VCS} >/dev/null 2>&1; then \
+	  ${MAKE} vcs; \
+	else \
+	  echo "Neither ${QRUN} nor ${VCS} found on PATH"; \
+	  exit 127; \
+	fi
+
+.PHONY: qrun
+qrun : fusesoc Test.sv
+	cd ${TEST_VCS_DIR} && ${QRUN} ${QRUN_OPTS} -F ${SIM_SCRIPT} ../../../Test.sv +input=${TEST_INPUT}
+
+.PHONY: vcs
+vcs : fusesoc Test.sv
+	cd ${TEST_VCS_DIR} && ${VCS} ${VCS_OPTS} +incdir+../.. -f ${SIM_SCRIPT} -top ${TOPLEVEL} -o ${VCS_SIM}
+	cd ${TEST_VCS_DIR} && ./${VCS_SIM} -l vcs.log +input=${TEST_INPUT}

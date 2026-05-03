@@ -8,9 +8,9 @@ package C_pkg;
 
 `include "C/CAbsyn.svh"
 `include "C/CParser.svh"
+`include "C/CInterpBase.svh"
 `include "C/CInterp.svh"
 `include "C/CPrinter.svh"
-
 
   // Returns the index of first occurrence of string 'sub' within string 's''s given index range.
   // Returns -1 otherwise.
@@ -30,18 +30,18 @@ package C_pkg;
     string str_before_sub, str_after_sub;
     int lo_idx = str_find(s, sub);
 
-    // check sub string exists
     if (!(lo_idx != -1))
       return s;
 
-    // the new_str contains 3 portions {str_before_sub, new_sub, str_after_sub}
     if (lo_idx > 0) str_before_sub = s.substr(0, lo_idx - 1);
     if (lo_idx + sub.len() < s.len()) str_after_sub = s.substr(lo_idx + sub.len(), s.len() - 1);
 
     return {str_before_sub, new_sub, str_after_sub};
   endfunction : str_replace
 
+
 `include "C/CAbsyn.sv"
+`include "C/CInterpBase.sv"
 `include "C/CInterp.sv"
 `include "C/CPrinter.sv"
 

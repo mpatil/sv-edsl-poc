@@ -8,12 +8,14 @@ filesets:
     files:
 
       - CAbsyn.svh: {is_include_file: true}
+      - CInterpBase.svh: {is_include_file: true}
       - CInterp.svh: {is_include_file: true}
       - CLexer.svh: {is_include_file: true}
       - CPrinter.svh: {is_include_file: true}
       - bio.svh: {is_include_file: true}
       - CParser.svh: {is_include_file: true}
       - CAbsyn.sv: {is_include_file: true}
+      - CInterpBase.sv: {is_include_file: true}
       - CInterp.sv: {is_include_file: true}
       - CPrinter.sv: {is_include_file: true}
 
