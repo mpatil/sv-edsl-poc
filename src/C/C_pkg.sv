@@ -12,6 +12,10 @@ package C_pkg;
 `include "C/CInterp.svh"
 `include "C/CPrinter.svh"
 
+  // Generated shared runtime helpers.
+  // Keep grammar-specific semantic state and symbol/environment machinery
+  // in the preserved Interp user files instead of this package support.
+
   // Returns the index of first occurrence of string 'sub' within string 's''s given index range.
   // Returns -1 otherwise.
   function automatic int str_find(string s, string sub, int range_lo = 0, int range_hi = -1);
