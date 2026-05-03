@@ -30,7 +30,6 @@ distclean : clean
 C/CLexer.svh : C.l
 	${SVLEX} ${SVLEX_OPTS} C.l
 	mv lex.yy.v C/CLexer.svh
-	sed -i 's/`define yymore() (yymorfg=1)/`define yymore yymorfg=1/' C/CLexer.svh
 
 C/CParser.svh : C.y
 	${SVACC} ${SVACC_OPTS} C.y
