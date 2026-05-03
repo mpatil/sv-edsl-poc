@@ -16,7 +16,7 @@ If you want to develop the language further and if EDSL_ROOT is where you have c
 
 ```
 git submodule update --init --recursive
-(cd $EDSL_ROOT/bnfc && stack build --stack-yaml stack-9.10.yaml BNFC --force-dirty --copy-bins)
+(cd $EDSL_ROOT/bnfc && stack build --stack-yaml stack-9.12.yaml BNFC --force-dirty --copy-bins)
 ~/.local/bin/bnfc -m --sv -l -o src C.cf
 setenv LEXPATH $EDSL_ROOT/sv-lex/src
 setenv YACCPATH $EDSL_ROOT/sv-yacc/src
