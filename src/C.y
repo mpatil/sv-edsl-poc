@@ -385,6 +385,7 @@ String_Literal : T_AnyChars {  $$ = StringLit::new ($1); $$.line_number = yy_myl
 endclass
 
 
+`ifdef DEFINE_ENTRYPOINTS
 /* Entrypoint: parse Program from file. */
 function Program pProgram(string filename);
 automatic Parser p = new();
@@ -408,6 +409,7 @@ automatic Parser p = new();
   else
     return p.YY_RESULT_Program_;/* Success */
 endfunction
+`endif
 
 
 

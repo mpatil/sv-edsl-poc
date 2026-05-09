@@ -52,9 +52,9 @@ run : fusesoc Test.sv
 
 .PHONY: qrun
 qrun : fusesoc Test.sv
-	cd ${TEST_VCS_DIR} && ${QRUN} ${QRUN_OPTS} -F ${SIM_SCRIPT} ../../../Test.sv +input=${TEST_INPUT}
+	cd ${TEST_VCS_DIR} && ${QRUN} ${QRUN_OPTS} +define+DEFINE_ENTRYPOINTS -F ${SIM_SCRIPT} ../../../Test.sv +input=${TEST_INPUT}
 
 .PHONY: vcs
 vcs : fusesoc Test.sv
-	cd ${TEST_VCS_DIR} && ${VCS} ${VCS_OPTS} +incdir+../.. -f ${SIM_SCRIPT} -top ${TOPLEVEL} -o ${VCS_SIM}
+	cd ${TEST_VCS_DIR} && ${VCS} ${VCS_OPTS} +define+DEFINE_ENTRYPOINTS +incdir+../.. -f ${SIM_SCRIPT} -top ${TOPLEVEL} -o ${VCS_SIM}
 	cd ${TEST_VCS_DIR} && ./${VCS_SIM} -l vcs.log +input=${TEST_INPUT}

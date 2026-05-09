@@ -1351,6 +1351,7 @@ endtask
 endclass
 
 
+`ifdef DEFINE_ENTRYPOINTS
 /* Entrypoint: parse Program from file. */
 function Program pProgram(string filename);
 automatic Parser p = new();
@@ -1374,6 +1375,7 @@ automatic Parser p = new();
   else
     return p.YY_RESULT_Program_;/* Success */
 endfunction
+`endif
 
 
 
